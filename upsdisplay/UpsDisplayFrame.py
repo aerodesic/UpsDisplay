@@ -58,7 +58,7 @@ class UpsDisplayFrame(wx.Frame):
         # begin wxGlade: UpsDisplayFrame.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
         wx.Frame.__init__(self, *args, **kwds)
-        self.SetTitle(_("Generator Test"))
+        self.SetTitle(_("UPS and PDU Control"))
 
         self.mainPanel = wx.Panel(self, wx.ID_ANY)
 
