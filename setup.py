@@ -19,7 +19,7 @@ setup(
     packages          = [ "upsdisplay" ],
     package_data      = { "upsdisplay": [ "bitmaps/upsdisplay.png", ] },
     license           = "Copyright 2021, Gary Oliver",
-    description       = "Generator Test main display",
+    description       = "UPS and PDU display",
     long_description  = open("README.md").read(),
     data_files        = [
         ("/usr/sbin",                        [ "upsdisplay/upsdisplay" ]),
