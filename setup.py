@@ -22,7 +22,7 @@ setup(
     description       = "UPS and PDU display",
     long_description  = open("README.md").read(),
     data_files        = [
-        ("/usr/sbin",                        [ "upsdisplay/upsdisplay" ]),
+        ("/usr/bin",                         [ "upsdisplay/upsdisplay" ]),
         ("share/bitmaps",                    [ "bitmaps/upsdisplay.png", ] ),
         ("share/upsdisplay",                 [ "extra/COPYING", ] ),
     ],
