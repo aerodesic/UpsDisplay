@@ -70,8 +70,8 @@ class UpsDisplayFrame(wx.Frame):
         self.text_ctrl_1 = wx.TextCtrl(self.mainPanel, wx.ID_ANY, "", style=wx.TE_READONLY)
         topSizer.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
 
-        self.statusSizer = wx.FlexGridSizer(0, 2, 0, 0)
-        self.mainSizer.Add(self.statusSizer, 1, wx.EXPAND, 0)
+        self.statusSizer = wx.FlexGridSizer(0, 2, 10, 0)
+        self.mainSizer.Add(self.statusSizer, 1, wx.ALL | wx.EXPAND, 5)
 
         buttonSizer = wx.FlexGridSizer(1, 1, 5, 10)
         self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
