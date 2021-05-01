@@ -77,15 +77,19 @@ class UpsDisplayFrame(wx.Frame):
         self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
 
         self.startButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Start"))
+        self.startButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         buttonSizer.Add(self.startButton, 0, 0, 0)
 
         self.stopButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Stop"))
+        self.stopButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         buttonSizer.Add(self.stopButton, 0, 0, 0)
 
-        self.shutdownButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Shutdown"))
+        self.shutdownButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Off"))
+        self.shutdownButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         buttonSizer.Add(self.shutdownButton, 0, 0, 0)
 
         self.Config = wx.Button(self.mainPanel, wx.ID_ANY, _("Config"))
+        self.Config.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         buttonSizer.Add(self.Config, 0, 0, 0)
 
         buttonSizer.AddGrowableCol(0)
@@ -106,7 +110,7 @@ class UpsDisplayFrame(wx.Frame):
 
         self.Bind(wx.EVT_BUTTON, self.OnStartButton, self.startButton)
         self.Bind(wx.EVT_BUTTON, self.OnStopButton, self.stopButton)
-        self.Bind(wx.EVT_BUTTON, self.OnShutdownButton, self.shutdownButton)
+        self.Bind(wx.EVT_BUTTON, self.OnOffButton, self.shutdownButton)
         self.Bind(wx.EVT_BUTTON, self.OnConfigButton, self.Config)
         self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         # end wxGlade
@@ -165,6 +169,7 @@ class UpsDisplayFrame(wx.Frame):
                 systemNameText = wx.StaticText(self.mainPanel, wx.ID_ANY, u"%s:" % system_object["name"])
                 self.statusSizer.Add(systemNameText, proportion=1, border=0, flag=wx.ALIGN_CENTER)
                 systemControlButton = wx.Button(self.mainPanel, wx.ID_ANY, u"---")
+                systemControlBytton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
                 self.statusSizer.Add(systemControlButton, proportion=1, border=0, flag=wx.EXPAND)
 
                 self.__system_objects[index] = { 'status': systemNameText, 'button': systemControlButton }
@@ -197,6 +202,9 @@ class UpsDisplayFrame(wx.Frame):
         event.Skip()
     def OnConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         print("Event handler 'OnConfigButton' not implemented!")
+        event.Skip()
+    def OnOffButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
+        print("Event handler 'OnOffButton' not implemented!")
         event.Skip()
 # end of class UpsDisplayFrame
 
