@@ -35,19 +35,19 @@ class UpsDisplayFrame(wx.Frame):
         },
         # numbered in display order
         'systems': {
-            '0': {
+            '1': {
                 'name': u"Nimbus",
                 'dns': "nimbus.aerodesic.net",
             },
-            '1': {
+            '2': {
                 'name': u"Cumulus",
                 'dns': "cumulus.aerodesic.net",
             },
-            '2': {
+            '3': {
                 'name': u"Nas2",
                 'dns': "nas2.aerodesic.net",
             },
-            '3': {
+            '4': {
                 'name': u"Nas3",
                 'dns': "nas3.aerodesic.net",
             },
@@ -62,10 +62,10 @@ class UpsDisplayFrame(wx.Frame):
 
         self.mainPanel = wx.Panel(self, wx.ID_ANY)
 
-        self.mainSizer = wx.FlexGridSizer(3, 1, 3, 3)
+        self.mainSizer = wx.FlexGridSizer(3, 1, 0, 3)
 
         topSizer = wx.FlexGridSizer(1, 0, 0, 0)
-        self.mainSizer.Add(topSizer, 1, wx.EXPAND, 0)
+        self.mainSizer.Add(topSizer, 1, wx.ALL | wx.EXPAND, 5)
 
         self.text_ctrl_1 = wx.TextCtrl(self.mainPanel, wx.ID_ANY, "", style=wx.TE_READONLY)
         topSizer.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
@@ -73,29 +73,14 @@ class UpsDisplayFrame(wx.Frame):
         self.statusSizer = wx.FlexGridSizer(0, 2, 0, 0)
         self.mainSizer.Add(self.statusSizer, 1, wx.EXPAND, 0)
 
-        buttonSizer = wx.FlexGridSizer(1, 4, 5, 10)
+        buttonSizer = wx.FlexGridSizer(1, 1, 5, 10)
         self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
-
-        self.startButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Start"))
-        self.startButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.startButton, 0, 0, 0)
-
-        self.stopButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Stop"))
-        self.stopButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.stopButton, 0, 0, 0)
-
-        self.shutdownButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Off"))
-        self.shutdownButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.shutdownButton, 0, 0, 0)
 
         self.Config = wx.Button(self.mainPanel, wx.ID_ANY, _("Config"))
         self.Config.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         buttonSizer.Add(self.Config, 0, 0, 0)
 
         buttonSizer.AddGrowableCol(0)
-        buttonSizer.AddGrowableCol(1)
-        buttonSizer.AddGrowableCol(2)
-        buttonSizer.AddGrowableCol(3)
 
         self.statusSizer.AddGrowableCol(1)
 
@@ -108,15 +93,18 @@ class UpsDisplayFrame(wx.Frame):
         self.mainSizer.Fit(self)
         self.Layout()
 
-        self.Bind(wx.EVT_BUTTON, self.OnStartButton, self.startButton)
-        self.Bind(wx.EVT_BUTTON, self.OnStopButton, self.stopButton)
-        self.Bind(wx.EVT_BUTTON, self.OnOffButton, self.shutdownButton)
         self.Bind(wx.EVT_BUTTON, self.OnConfigButton, self.Config)
         self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         # end wxGlade
 
+        self.__text_font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, "")
+        self.__button_font = self.__text_font
+
+        self.Config.SetFont(self.__text_font)
+
         self.__config = VarTab()
         self.__system_objects = {}
+
 
         # Try to load from config file and not not successful, preset the configuration
         try:
@@ -148,6 +136,17 @@ class UpsDisplayFrame(wx.Frame):
 
         self.statusSizer.SetRows(0)
 
+        # Add the main Power button
+        systemNameText = wx.StaticText(self.mainPanel, wx.ID_ANY, u"Power")
+        systemNameText.SetFont(self.__text_font)
+        self.statusSizer.Add(systemNameText, proportion=1, border=0, flag=wx.ALIGN_CENTER)
+        systemControlButton = wx.Button(self.mainPanel, wx.ID_ANY, u"---")
+        systemControlButton.SetFont(self.__button_font)
+        self.Bind(wx.EVT_BUTTON, self.OnSystemButton, systemControlButton)
+        self.statusSizer.Add(systemControlButton, proportion=1, border=0, flag=wx.EXPAND)
+        # Save in list organized by button ID
+        self.__system_objects[systemControlButton.GetId()] = { 'status': systemNameText, 'button': systemControlButton }
+
         try:
             # Fetch list of graphs to be displayed, in order of appearance
             systems = self.__config.GetValue("systems")
@@ -167,12 +166,15 @@ class UpsDisplayFrame(wx.Frame):
 
                 # Add the system name and status button (which doubles as control button)
                 systemNameText = wx.StaticText(self.mainPanel, wx.ID_ANY, u"%s:" % system_object["name"])
+                systemNameText.SetFont(self.__text_font)
                 self.statusSizer.Add(systemNameText, proportion=1, border=0, flag=wx.ALIGN_CENTER)
                 systemControlButton = wx.Button(self.mainPanel, wx.ID_ANY, u"---")
-                systemControlBytton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
+                systemControlButton.SetFont(self.__button_font)
+                self.Bind(wx.EVT_BUTTON, self.OnSystemButton, systemControlButton)
                 self.statusSizer.Add(systemControlButton, proportion=1, border=0, flag=wx.EXPAND)
 
-                self.__system_objects[index] = { 'status': systemNameText, 'button': systemControlButton }
+                # Save in list organized by button ID
+                self.__system_objects[systemControlButton.GetId()] = { 'status': systemNameText, 'button': systemControlButton }
 
         except Exception as e:
             traceback.print_exc()
@@ -191,20 +193,19 @@ class UpsDisplayFrame(wx.Frame):
     def OnClose(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         print("Event handler 'OnClose' not implemented!")
         event.Skip()
-    def OnStartButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print("Event handler 'OnStartButton' not implemented!")
-        event.Skip()
-    def OnStopButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print("Event handler 'OnStopButton' not implemented!")
-        event.Skip()
-    def OnShutdownButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        self.ReloadObjects()
-        event.Skip()
+
     def OnConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         print("Event handler 'OnConfigButton' not implemented!")
         event.Skip()
-    def OnOffButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print("Event handler 'OnOffButton' not implemented!")
+
+    def OnSystemButton(self, event):
+        button_id = event.GetId()
+        if button_id in self.__system_objects:
+            system_object = self.__system_objects[button_id]
+            print("OnSystemButton: %s" % system_object['status'].GetLabel())
+        else:
+            print("OnSystemButton: %d not in system_objects" % button_id)
         event.Skip()
+
 # end of class UpsDisplayFrame
 
