@@ -8,19 +8,24 @@ import wx
 # end wxGlade
 
 # begin wxGlade: extracode
+from TextCheckboxSelect import *
 # end wxGlade
 
 class ConfigDialog(wx.Dialog):
-    def __init__(self, *args, **kwds):
+    def __init__(self, parent=None, *args, **kwds):
+        kwds['parent'] = parent
+        # This needs to come from external
+        self.devices_available = [ 'nas1', 'nas2', 'nas3', 'cirrus', 'nimbus' ]
+
         # begin wxGlade: ConfigDialog.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         wx.Dialog.__init__(self, *args, **kwds)
         self.SetTitle(_("dialog"))
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        infoSizer = wx.FlexGridSizer(7, 3, 5, 5)
-        mainSizer.Add(infoSizer, 1, wx.EXPAND, 0)
+        infoSizer = wx.FlexGridSizer(6, 3, 5, 5)
+        mainSizer.Add(infoSizer, 1, wx.ALL | wx.EXPAND, 1)
 
         label_1 = wx.StaticText(self, wx.ID_ANY, _("Device:"))
         infoSizer.Add(label_1, 0, 0, 0)
@@ -31,56 +36,48 @@ class ConfigDialog(wx.Dialog):
         self.scanDeviceButton = wx.Button(self, wx.ID_ANY, _("Rescan"))
         infoSizer.Add(self.scanDeviceButton, 0, 0, 0)
 
-        label_2 = wx.StaticText(self, wx.ID_ANY, _("Phase 1 FFT:"))
-        infoSizer.Add(label_2, 0, 0, 0)
+        uri_label = wx.StaticText(self, wx.ID_ANY, _("URI:"))
+        infoSizer.Add(uri_label, 0, 0, 0)
 
-        self.phase1fft = wx.CheckBox(self, wx.ID_ANY, "")
-        infoSizer.Add(self.phase1fft, 0, 0, 0)
+        self.uri = wx.TextCtrl(self, wx.ID_ANY, "")
+        infoSizer.Add(self.uri, 0, 0, 0)
 
-        infoSizer.Add((20, 20), 0, 0, 0)
+        infoSizer.Add((0, 0), 0, 0, 0)
 
-        label_3 = wx.StaticText(self, wx.ID_ANY, _("Phase 1 Freq:"))
-        infoSizer.Add(label_3, 0, 0, 0)
+        requires_label = wx.StaticText(self, wx.ID_ANY, _("Requires:"))
+        infoSizer.Add(requires_label, 0, 0, 0)
 
-        self.phase1freq = wx.CheckBox(self, wx.ID_ANY, "")
-        infoSizer.Add(self.phase1freq, 0, 0, 0)
+        self.requires = wx.TextCtrl(self, wx.ID_ANY, "")
+        infoSizer.Add(self.requires, 0, wx.EXPAND, 0)
 
-        infoSizer.Add((20, 20), 0, 0, 0)
+        infoSizer.Add((0, 0), 0, 0, 0)
 
-        label_6 = wx.StaticText(self, wx.ID_ANY, _("Phase 1 Current:"))
-        infoSizer.Add(label_6, 0, 0, 0)
+        wants_label = wx.StaticText(self, wx.ID_ANY, _("Wants:"))
+        infoSizer.Add(wants_label, 0, wx.FIXED_MINSIZE, 0)
 
-        self.phase1current = wx.CheckBox(self, wx.ID_ANY, "")
-        infoSizer.Add(self.phase1current, 0, 0, 0)
+        self.wants = wx.TextCtrl(self, wx.ID_ANY, "")
+        infoSizer.Add(self.wants, 0, wx.EXPAND, 0)
 
-        infoSizer.Add((20, 20), 0, 0, 0)
+        infoSizer.Add((0, 0), 0, 0, 0)
 
-        label_4 = wx.StaticText(self, wx.ID_ANY, _("Phase 2 FFT:"))
-        infoSizer.Add(label_4, 0, 0, 0)
+        start_label = wx.StaticText(self, wx.ID_ANY, _("Start Action:"))
+        infoSizer.Add(start_label, 0, 0, 0)
 
-        self.phase2fft = wx.CheckBox(self, wx.ID_ANY, "")
-        infoSizer.Add(self.phase2fft, 0, 0, 0)
+        self.start_action = wx.TextCtrl(self, wx.ID_ANY, "")
+        infoSizer.Add(self.start_action, 0, 0, 0)
 
-        infoSizer.Add((20, 20), 0, 0, 0)
+        infoSizer.Add((0, 0), 0, 0, 0)
 
-        label_5 = wx.StaticText(self, wx.ID_ANY, _("Phase 2 Freq:"))
-        infoSizer.Add(label_5, 0, 0, 0)
+        stop_label = wx.StaticText(self, wx.ID_ANY, _("Stop Action:"))
+        infoSizer.Add(stop_label, 0, 0, 0)
 
-        self.phase2freq = wx.CheckBox(self, wx.ID_ANY, "")
-        infoSizer.Add(self.phase2freq, 0, 0, 0)
-
-        infoSizer.Add((20, 20), 0, 0, 0)
-
-        label_7 = wx.StaticText(self, wx.ID_ANY, _("Phase 2 Current:"))
-        infoSizer.Add(label_7, 0, 0, 0)
-
-        self.phase2current = wx.CheckBox(self, wx.ID_ANY, "")
-        infoSizer.Add(self.phase2current, 0, 0, 0)
+        self.stop_action = wx.TextCtrl(self, wx.ID_ANY, "")
+        infoSizer.Add(self.stop_action, 0, 0, 0)
 
         infoSizer.Add((20, 20), 0, 0, 0)
 
         buttonSizer = wx.StdDialogButtonSizer()
-        mainSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 4)
+        mainSizer.Add(buttonSizer, 1, wx.EXPAND, 0)
 
         self.button_OK = wx.Button(self, wx.ID_OK, "")
         self.button_OK.SetDefault()
@@ -91,7 +88,8 @@ class ConfigDialog(wx.Dialog):
 
         buttonSizer.Realize()
 
-        infoSizer.AddGrowableCol(1)
+        infoSizer.AddGrowableRow(0)
+        infoSizer.AddGrowableCol(0)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
@@ -106,6 +104,9 @@ class ConfigDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnRescanButton, self.scanDeviceButton)
         # end wxGlade
 
+        self.requires.Bind(wx.EVT_LEFT_DOWN, self.OnDeviceListSelected)
+        self.wants.Bind(wx.EVT_LEFT_DOWN, self.OnDeviceListSelected)
+
     def LoadDialog(self, data):
         for item in data:
             try:
@@ -119,4 +120,20 @@ class ConfigDialog(wx.Dialog):
     def OnRescanButton(self, event):  # wxGlade: ConfigDialog.<event_handler>
         print("Event handler 'OnRescanButton' not implemented!")
         event.Skip()
+
+    def OnDeviceListSelected(self, event):
+        activator = event.GetEventObject()
+        print("OnDeviceListSelected fired for %s" % activator.GetName())
+        raw_selected = activator.GetLineText(0)
+        selected = raw_selected.split(' ') if len(raw_selected) != 0 else []
+        print("OnDeviceListSelected: selected %s string '%s'" % (selected, raw_selected))
+        wanted = TextCheckboxSelect(self, title=_("Select zero or more devices"), choices=self.devices_available, selected=selected)
+        if wanted.ShowModal() == wx.ID_OK:
+            results = wanted.GetSelectedItems()
+            print(results)
+            print("TextCheckboxSelect returns: %s" % results)
+            activator.ChangeValue(" ".join(results))
+        
+        event.Skip()
+
 # end of class ConfigDialog

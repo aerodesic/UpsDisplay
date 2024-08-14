@@ -183,19 +183,17 @@ class UpsDisplayFrame(wx.Frame):
         self.mainSizer.Layout()
         self.Fit()
 
-    def OnClose(self, event):  # wxGlade: UpsDisplayFrae.<event_handler>
-        self.CloseUps()
-        event.Skip()
-
     def CloseUps(self):
         pass
 
     def OnClose(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print("Event handler 'OnClose' not implemented!")
+        print('OnClose called')
+        self.CloseUps()
         event.Skip()
 
     def OnConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print("Event handler 'OnConfigButton' not implemented!")
+        config = ConfigDialog(self)
+        rc = config.ShowModal()
         event.Skip()
 
     def OnSystemButton(self, event):
