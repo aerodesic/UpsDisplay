@@ -17,17 +17,17 @@ class TextCheckboxSelect(wx.Dialog):
         self.choices = choices
         self.selected = selected
         # begin wxGlade: TextCheckboxSelect.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.CAPTION | wx.RESIZE_BORDER | wx.STAY_ON_TOP
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
         self.SetTitle(_("Select zero or more items"))
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
         self.choiceList = wx.CheckListBox(self, wx.ID_ANY, choices=[], style=wx.LB_MULTIPLE)
-        mainSizer.Add(self.choiceList, 1, wx.ALL | wx.EXPAND, 0)
+        mainSizer.Add(self.choiceList, 1, wx.ALL | wx.EXPAND, 1)
 
         buttonSizer = wx.StdDialogButtonSizer()
-        mainSizer.Add(buttonSizer, 1, wx.EXPAND, 0)
+        mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
 
         self.button_OK = wx.Button(self, wx.ID_OK, "")
         self.button_OK.SetDefault()
@@ -52,7 +52,7 @@ class TextCheckboxSelect(wx.Dialog):
         if title is not None:
             self.SetTitle(title)
         self.Layout()
-        self.Update()
+        mainSizer.Fit(self)
         # end wxGlade
 
     # Return the current selected items in the checkbox list

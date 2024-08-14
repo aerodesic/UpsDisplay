@@ -18,66 +18,53 @@ class ConfigDialog(wx.Dialog):
         self.devices_available = [ 'nas1', 'nas2', 'nas3', 'cirrus', 'nimbus' ]
 
         # begin wxGlade: ConfigDialog.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
         self.SetTitle(_("dialog"))
 
-        mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
+        self.mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        infoSizer = wx.FlexGridSizer(6, 3, 5, 5)
-        mainSizer.Add(infoSizer, 1, wx.ALL | wx.EXPAND, 1)
+        self.infoSizer = wx.FlexGridSizer(12, 1, 5, 5)
+        self.mainSizer.Add(self.infoSizer, 1, wx.ALL | wx.EXPAND, 5)
 
         label_1 = wx.StaticText(self, wx.ID_ANY, _("Device:"))
-        infoSizer.Add(label_1, 0, 0, 0)
+        self.infoSizer.Add(label_1, 0, 0, 0)
 
         self.device = wx.ComboBox(self, wx.ID_ANY, choices=[], style=wx.CB_DROPDOWN)
-        infoSizer.Add(self.device, 0, wx.EXPAND, 0)
-
-        self.scanDeviceButton = wx.Button(self, wx.ID_ANY, _("Rescan"))
-        infoSizer.Add(self.scanDeviceButton, 0, 0, 0)
+        self.infoSizer.Add(self.device, 0, wx.EXPAND, 0)
 
         uri_label = wx.StaticText(self, wx.ID_ANY, _("URI:"))
-        infoSizer.Add(uri_label, 0, 0, 0)
+        self.infoSizer.Add(uri_label, 0, 0, 0)
 
         self.uri = wx.TextCtrl(self, wx.ID_ANY, "")
-        infoSizer.Add(self.uri, 0, 0, 0)
-
-        infoSizer.Add((0, 0), 0, 0, 0)
+        self.infoSizer.Add(self.uri, 0, wx.EXPAND, 0)
 
         requires_label = wx.StaticText(self, wx.ID_ANY, _("Requires:"))
-        infoSizer.Add(requires_label, 0, 0, 0)
+        self.infoSizer.Add(requires_label, 0, 0, 0)
 
         self.requires = wx.TextCtrl(self, wx.ID_ANY, "")
-        infoSizer.Add(self.requires, 0, wx.EXPAND, 0)
-
-        infoSizer.Add((0, 0), 0, 0, 0)
+        self.infoSizer.Add(self.requires, 0, wx.EXPAND, 0)
 
         wants_label = wx.StaticText(self, wx.ID_ANY, _("Wants:"))
-        infoSizer.Add(wants_label, 0, wx.FIXED_MINSIZE, 0)
+        self.infoSizer.Add(wants_label, 0, wx.FIXED_MINSIZE, 0)
 
         self.wants = wx.TextCtrl(self, wx.ID_ANY, "")
-        infoSizer.Add(self.wants, 0, wx.EXPAND, 0)
-
-        infoSizer.Add((0, 0), 0, 0, 0)
+        self.infoSizer.Add(self.wants, 0, wx.EXPAND, 0)
 
         start_label = wx.StaticText(self, wx.ID_ANY, _("Start Action:"))
-        infoSizer.Add(start_label, 0, 0, 0)
+        self.infoSizer.Add(start_label, 0, 0, 0)
 
         self.start_action = wx.TextCtrl(self, wx.ID_ANY, "")
-        infoSizer.Add(self.start_action, 0, 0, 0)
-
-        infoSizer.Add((0, 0), 0, 0, 0)
+        self.infoSizer.Add(self.start_action, 0, wx.EXPAND, 0)
 
         stop_label = wx.StaticText(self, wx.ID_ANY, _("Stop Action:"))
-        infoSizer.Add(stop_label, 0, 0, 0)
+        self.infoSizer.Add(stop_label, 0, 0, 0)
 
         self.stop_action = wx.TextCtrl(self, wx.ID_ANY, "")
-        infoSizer.Add(self.stop_action, 0, 0, 0)
-
-        infoSizer.Add((20, 20), 0, 0, 0)
+        self.infoSizer.Add(self.stop_action, 0, wx.EXPAND, 0)
 
         buttonSizer = wx.StdDialogButtonSizer()
-        mainSizer.Add(buttonSizer, 1, wx.EXPAND, 0)
+        self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER | wx.ALL, 5)
 
         self.button_OK = wx.Button(self, wx.ID_OK, "")
         self.button_OK.SetDefault()
@@ -88,20 +75,18 @@ class ConfigDialog(wx.Dialog):
 
         buttonSizer.Realize()
 
-        infoSizer.AddGrowableRow(0)
-        infoSizer.AddGrowableCol(0)
+        self.infoSizer.AddGrowableRow(0)
+        self.infoSizer.AddGrowableCol(0)
 
-        mainSizer.AddGrowableRow(0)
-        mainSizer.AddGrowableCol(0)
-        self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
+        self.mainSizer.AddGrowableRow(0)
+        self.mainSizer.AddGrowableCol(0)
+        self.SetSizer(self.mainSizer)
+        self.mainSizer.Fit(self)
 
         self.SetAffirmativeId(self.button_OK.GetId())
         self.SetEscapeId(self.button_CANCEL.GetId())
 
         self.Layout()
-
-        self.Bind(wx.EVT_BUTTON, self.OnRescanButton, self.scanDeviceButton)
         # end wxGlade
 
         self.requires.Bind(wx.EVT_LEFT_DOWN, self.OnDeviceListSelected)
@@ -133,6 +118,8 @@ class ConfigDialog(wx.Dialog):
             print(results)
             print("TextCheckboxSelect returns: %s" % results)
             activator.ChangeValue(" ".join(results))
+            self.Fit()
+            self.Show()
         
         event.Skip()
 
