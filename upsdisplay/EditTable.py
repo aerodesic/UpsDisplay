@@ -10,6 +10,7 @@ import wx
 # begin wxGlade: extracode
 from wx.lib.mixins import listctrl
 import wx.lib.agw.ultimatelistctrl as ULC
+import sys
 class TableListCtrl(wx.ListCtrl, listctrl.ListCtrlAutoWidthMixin):
     def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
         wx.ListCtrl.__init__(self, parent, ID, pos, size, style)
@@ -20,28 +21,22 @@ class MyListCtrl(ULC.UltimateListCtrl):
     def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
         # super(MyListCtrl, self).__init__(id=ID, parent=parent, agwStyle=ULC.ULC_REPORT | ULC.ULC_HRULES)
         super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD)
-        self.rows = 0
 
     def AppendColumn(self, header):
-        self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT, width=wx.LIST_AUTOSIZE)
+        self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT)
 
     def AppendRow(self, datalist):
         print("Append: %s" % datalist)
-        for column in range(len(datalist)):
+        index = self.InsertStringItem(sys.maxsize, datalist[0])
+        for column in range(1, len(datalist)):
             field = datalist[column]
 
             if type(field) is list:
-                field = ",".join(field)
+                field = ", ".join(field)
             else:
                 field = "%s" % field
 
-            if column == 0:
-                self.InsertStringItem(self.rows, field)
-            else:
-                self.SetStringItem(self.rows, column, field)
-
-        self.rows = self.rows + 1
-        self.Refresh()
+            self.SetStringItem(index, column, field)
 # end wxGlade
 
 
@@ -75,6 +70,10 @@ class EditTable(wx.Dialog):
         # Populate the rows
         for row in data:
             self.itemList.AppendRow([row[field] for field in self.fields])
+        # Force autosize columns
+        for col in range(0, len(self.headers) - 1):
+            self.itemList.SetColumnWidth(col, width=wx.LIST_AUTOSIZE)
+        self.itemList.SetColumnWidth(len(self.headers) - 1, width=-3) #AUTOSIZE_FILL last column
         mainSizer.Add(self.itemList, 1, wx.ALL | wx.EXPAND, 0)
 
         buttonSizer = wx.StdDialogButtonSizer()
@@ -99,6 +98,8 @@ class EditTable(wx.Dialog):
 
         self.Layout()
         self.Maximize()
+        self.Fit()
+        self.Layout()
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.itemList)
         # end wxGlade
