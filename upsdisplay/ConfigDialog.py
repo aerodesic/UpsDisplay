@@ -4,6 +4,8 @@
 #
 
 import wx
+import sys
+
 # begin wxGlade: dependencies
 # end wxGlade
 
@@ -14,8 +16,6 @@ from TextCheckboxSelect import *
 class ConfigDialog(wx.Dialog):
     def __init__(self, parent=None, *args, **kwds):
         kwds['parent'] = parent
-        # This needs to come from external
-        self.devices_available = [ 'nas1', 'nas2', 'nas3', 'cirrus', 'nimbus' ]
 
         # begin wxGlade: ConfigDialog.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
@@ -24,44 +24,10 @@ class ConfigDialog(wx.Dialog):
 
         self.mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        self.infoSizer = wx.FlexGridSizer(12, 1, 5, 5)
-        self.mainSizer.Add(self.infoSizer, 1, wx.ALL | wx.EXPAND, 5)
-
-        label_1 = wx.StaticText(self, wx.ID_ANY, _("Device:"))
-        self.infoSizer.Add(label_1, 0, 0, 0)
-
-        self.device = wx.ComboBox(self, wx.ID_ANY, choices=[], style=wx.CB_DROPDOWN)
-        self.infoSizer.Add(self.device, 0, wx.EXPAND, 0)
-
-        uri_label = wx.StaticText(self, wx.ID_ANY, _("URI:"))
-        self.infoSizer.Add(uri_label, 0, 0, 0)
-
-        self.uri = wx.TextCtrl(self, wx.ID_ANY, "")
-        self.infoSizer.Add(self.uri, 0, wx.EXPAND, 0)
-
-        requires_label = wx.StaticText(self, wx.ID_ANY, _("Requires:"))
-        self.infoSizer.Add(requires_label, 0, 0, 0)
-
-        self.requires = wx.TextCtrl(self, wx.ID_ANY, "")
-        self.infoSizer.Add(self.requires, 0, wx.EXPAND, 0)
-
-        wants_label = wx.StaticText(self, wx.ID_ANY, _("Wants:"))
-        self.infoSizer.Add(wants_label, 0, wx.FIXED_MINSIZE, 0)
-
-        self.wants = wx.TextCtrl(self, wx.ID_ANY, "")
-        self.infoSizer.Add(self.wants, 0, wx.EXPAND, 0)
-
-        start_label = wx.StaticText(self, wx.ID_ANY, _("Start Action:"))
-        self.infoSizer.Add(start_label, 0, 0, 0)
-
-        self.start_action = wx.TextCtrl(self, wx.ID_ANY, "")
-        self.infoSizer.Add(self.start_action, 0, wx.EXPAND, 0)
-
-        stop_label = wx.StaticText(self, wx.ID_ANY, _("Stop Action:"))
-        self.infoSizer.Add(stop_label, 0, 0, 0)
-
-        self.stop_action = wx.TextCtrl(self, wx.ID_ANY, "")
-        self.infoSizer.Add(self.stop_action, 0, wx.EXPAND, 0)
+        self.configuration = wx.ListCtrl(self, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
+        self.configuration.AppendColumn(_("Device"), format=wx.LIST_FORMAT_LEFT, width=-1)
+        self.configuration.AppendColumn(_("Uri"), format=wx.LIST_FORMAT_LEFT, width=-1)
+        self.mainSizer.Add(self.configuration, 1, wx.EXPAND, 0)
 
         buttonSizer = wx.StdDialogButtonSizer()
         self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER | wx.ALL, 5)
@@ -75,9 +41,6 @@ class ConfigDialog(wx.Dialog):
 
         buttonSizer.Realize()
 
-        self.infoSizer.AddGrowableRow(0)
-        self.infoSizer.AddGrowableCol(0)
-
         self.mainSizer.AddGrowableRow(0)
         self.mainSizer.AddGrowableCol(0)
         self.SetSizer(self.mainSizer)
@@ -87,40 +50,53 @@ class ConfigDialog(wx.Dialog):
         self.SetEscapeId(self.button_CANCEL.GetId())
 
         self.Layout()
+        self.Maximize()
         # end wxGlade
-
-        self.requires.Bind(wx.EVT_LEFT_DOWN, self.OnDeviceListSelected)
-        self.wants.Bind(wx.EVT_LEFT_DOWN, self.OnDeviceListSelected)
-
-    def LoadDialog(self, data):
-        for item in data:
-            try:
-                control = getattr(self, item)
-                control.SetValue(data[item])
-            except Exception as e:
-                print("LoadDialog: %s:%s %s" % (item, data[item], str(e)))
-
-        self.Update()
 
     def OnRescanButton(self, event):  # wxGlade: ConfigDialog.<event_handler>
         print("Event handler 'OnRescanButton' not implemented!")
         event.Skip()
 
-    def OnDeviceListSelected(self, event):
+    def OnDeviceListSelect(self, event):
         activator = event.GetEventObject()
-        print("OnDeviceListSelected fired for %s" % activator.GetName())
         raw_selected = activator.GetLineText(0)
         selected = raw_selected.split(' ') if len(raw_selected) != 0 else []
-        print("OnDeviceListSelected: selected %s string '%s'" % (selected, raw_selected))
-        wanted = TextCheckboxSelect(self, title=_("Select zero or more devices"), choices=self.devices_available, selected=selected)
+        wanted = TextCheckboxSelect(self, title=_("Select a device"), choose_one=choose_one, choices=self.devices_available, selected=selected)
         if wanted.ShowModal() == wx.ID_OK:
             results = wanted.GetSelectedItems()
-            print(results)
-            print("TextCheckboxSelect returns: %s" % results)
             activator.ChangeValue(" ".join(results))
             self.Fit()
             self.Show()
-        
         event.Skip()
+
+    # Config is a dictionary containing:
+    #     'available': [ <list of device names available> ],
+    #     'devices': {
+    #         '<device name>': {
+    #             'uri': <text of uri to contact device>,
+    #             'requires': [ <list of devices that are required to be on to enable this device> ],
+    #             'wants': [ <list of devices that should be on to enable this device> ],
+    #             'start': <action to start this device>,
+    #             'stop': <action to stop this device>,
+    #             'main': <True if to place on main screen>,
+    #         }
+    #     }
+    def LoadConfig(self, config):
+        self.config = config
+
+        # Load the device ListCtrl
+        for device in self.config['devices']:
+            index = self.configuration.InsertStringItem(sys.maxsize, device)
+
+    # Return a list of unused devices
+    def GetUnusedDevices(self):
+        unused = self.config['available'] if 'available' in self.config else []
+        if 'devices' in self.config:
+            for device in self.config['devices']:
+                del(unused[device])
+        return unused
+
+    def GetConfig(self):
+        return config
 
 # end of class ConfigDialog

@@ -8,6 +8,7 @@ import wx
 # end wxGlade
 
 # begin wxGlade: extracode
+from EditTable import *
 # end wxGlade
 
 
@@ -29,32 +30,84 @@ from ConfigDialog import *
 
 CONFIGFILE = ".upsdisplay"
 
+
 class UpsDisplayFrame(wx.Frame):
-    __DEFAULT_CONFIG = {
+
+    DEFAULT_CONFIG = {
         'global': {
         },
-        # numbered in display order
-        'systems': {
-            '1': {
-                'name': u"Nimbus",
+        'available': [],
+        'nodes': [{
+                'name': 'Nimbus',
                 'dns': "nimbus.aerodesic.net",
-            },
-            '2': {
-                'name': u"Cumulus",
+                'uri': 'APC:1',
+                'requires': ["Nas3"],
+                'wants': ["Nas1", "Nas2"],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "Cumulus",
                 'dns': "cumulus.aerodesic.net",
-            },
-            '3': {
-                'name': u"Nas2",
-                'dns': "nas2.aerodesic.net",
-            },
-            '4': {
-                'name': u"Nas3",
+                'uri': 'APC:2',
+                'requires': ["Nas3"],
+                'wants': [],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "Nas1",
+                'dns': "nas1.aerodesic.net",
+                'uri': 'APC:3',
+                'requires': ["Nas3"],
+                'wants': [],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "Nas2",
+                'dns': "nimbus.aerodesic.net",
+                'uri': 'APC:4',
+                'requires': ["Nas3"],
+                'wants': [],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "Nas3",
                 'dns': "nas3.aerodesic.net",
+                'uri': 'APC:5',
+                'requires': [],
+                'wants': ["Gatekeeper"],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "Gatekeeper",
+                'dns': 'gatekeeper.aerodesic.net',
+                'uri': 'APC:6',
+                'requires': [ "DmzSwitch", "NasSwitch" ],
+                'wants': [],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "DmzSwitch",
+                'dns': '',
+                'uri': 'APC:7',
+                'requires': [],
+                'wants': [],
+                'start': 'apcstart',
+                'stop': 'apcstop',
+            },{
+                'name': "NasSwitch",
+                'dns': '',
+                'uri': 'APC:8',
+                'requires': [],
+                'wants': [],
+                'start': 'apcstart',
+                'stop': 'apcstop',
             },
-        },
+        ],
     }
 
     def __init__(self, *args, **kwds):
+        self.config = self.DEFAULT_CONFIG
+
         # begin wxGlade: UpsDisplayFrame.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.MAXIMIZE | wx.STAY_ON_TOP
         wx.Frame.__init__(self, *args, **kwds)
@@ -73,12 +126,16 @@ class UpsDisplayFrame(wx.Frame):
         self.statusSizer = wx.FlexGridSizer(0, 2, 10, 0)
         self.mainSizer.Add(self.statusSizer, 1, wx.ALL | wx.EXPAND, 5)
 
-        buttonSizer = wx.FlexGridSizer(1, 1, 5, 10)
+        buttonSizer = wx.FlexGridSizer(1, 3, 5, 10)
         self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
 
-        self.Config = wx.Button(self.mainPanel, wx.ID_ANY, _("Config"))
-        self.Config.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.Config, 0, 0, 0)
+        self.nodeConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Nodes"))
+        self.nodeConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
+        buttonSizer.Add(self.nodeConfigButton, 0, 0, 0)
+
+        self.deviceConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Devices"))
+        self.deviceConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
+        buttonSizer.Add(self.deviceConfigButton, 0, 0, 0)
 
         buttonSizer.AddGrowableCol(0)
 
@@ -93,91 +150,12 @@ class UpsDisplayFrame(wx.Frame):
         self.mainSizer.Fit(self)
         self.Layout()
 
-        self.Bind(wx.EVT_BUTTON, self.OnConfigButton, self.Config)
+        self.Bind(wx.EVT_BUTTON, self.OnNodeConfigButton, self.nodeConfigButton)
+        self.Bind(wx.EVT_BUTTON, self.OnDevicesConfigButton, self.deviceConfigButton)
         self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         # end wxGlade
 
-        self.__text_font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, "")
-        self.__button_font = self.__text_font
-
-        self.Config.SetFont(self.__text_font)
-
-        self.__config = VarTab()
-        self.__system_objects = {}
-
-
-        # Try to load from config file and not not successful, preset the configuration
-        try:
-            with open(os.path.join(os.getenv("HOME"), CONFIGFILE)) as f:
-                self.__config.Load(json.reads(f.read()))
-
-        except:
-            # Failed to load - reset config and load initial values
-            self.__config.Load(self.__DEFAULT_CONFIG)
-
-            try:
-                with open(os.path.join(os.getenv("HOME"), CONFIGFILE), "w") as f:
-                   f.write(json.dumps(self.__config.GetValue(), indent=4, sort_keys=True))
-
-            except Exception as e:
-                traceback.print_exc()
-
-        self.ReloadObjects()
-
-
-    def ReloadObjects(self):
-        # Remove all children
-        for index in sorted(list(self.__system_objects)):
-            element = self.__system_objects[index]
-            print("Removing item %s" % index)
-            self.statusSizer.Detach(element['status'])
-            self.statusSizer.Detach(element['button'])
-            del self.__system_objects[index]
-
-        self.statusSizer.SetRows(0)
-
-        # Add the main Power button
-        systemNameText = wx.StaticText(self.mainPanel, wx.ID_ANY, u"Power")
-        systemNameText.SetFont(self.__text_font)
-        self.statusSizer.Add(systemNameText, proportion=1, border=0, flag=wx.ALIGN_CENTER)
-        systemControlButton = wx.Button(self.mainPanel, wx.ID_ANY, u"---")
-        systemControlButton.SetFont(self.__button_font)
-        self.Bind(wx.EVT_BUTTON, self.OnSystemButton, systemControlButton)
-        self.statusSizer.Add(systemControlButton, proportion=1, border=0, flag=wx.EXPAND)
-        # Save in list organized by button ID
-        self.__system_objects[systemControlButton.GetId()] = { 'status': systemNameText, 'button': systemControlButton }
-
-        try:
-            # Fetch list of graphs to be displayed, in order of appearance
-            systems = self.__config.GetValue("systems")
-
-            indices = sorted(list(systems))
-            print("indices: %s" % indices)
-
-            print("systems: %s" % systems)
-
-            row = 0
-
-            # For each graph, get configuration and allocate the graph
-            for index in indices:
-                system_object = self.__config.GetValue("%s" % index, base=systems)
-
-                print("Add at %s item for %s (%s)" % (index, system_object["name"], system_object["dns"]))
-
-                # Add the system name and status button (which doubles as control button)
-                systemNameText = wx.StaticText(self.mainPanel, wx.ID_ANY, u"%s:" % system_object["name"])
-                systemNameText.SetFont(self.__text_font)
-                self.statusSizer.Add(systemNameText, proportion=1, border=0, flag=wx.ALIGN_CENTER)
-                systemControlButton = wx.Button(self.mainPanel, wx.ID_ANY, u"---")
-                systemControlButton.SetFont(self.__button_font)
-                self.Bind(wx.EVT_BUTTON, self.OnSystemButton, systemControlButton)
-                self.statusSizer.Add(systemControlButton, proportion=1, border=0, flag=wx.EXPAND)
-
-                # Save in list organized by button ID
-                self.__system_objects[systemControlButton.GetId()] = { 'status': systemNameText, 'button': systemControlButton }
-
-        except Exception as e:
-            traceback.print_exc()
+        # self.ReloadObjects()
 
         self.statusSizer.Layout()
         self.mainSizer.Layout()
@@ -191,19 +169,14 @@ class UpsDisplayFrame(wx.Frame):
         self.CloseUps()
         event.Skip()
 
-    def OnConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        config = ConfigDialog(self)
-        rc = config.ShowModal()
+    def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
+        dlg=EditTable(self, data=self.config['nodes'],  fields=['name', 'uri', 'requires', 'wants'], headers=['Node', 'Uri', 'Requires', 'Wants'], editEntry=None)
+        if dlg.ShowModal() == wx.ID_OK:
+            print(self.config[Nodes])
         event.Skip()
 
-    def OnSystemButton(self, event):
-        button_id = event.GetId()
-        if button_id in self.__system_objects:
-            system_object = self.__system_objects[button_id]
-            print("OnSystemButton: %s" % system_object['status'].GetLabel())
-        else:
-            print("OnSystemButton: %d not in system_objects" % button_id)
+    def OnDevicesConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
+        print("Event handler 'OnDevicesConfigButton' not implemented!")
         event.Skip()
-
 # end of class UpsDisplayFrame
 

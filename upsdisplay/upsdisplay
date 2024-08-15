@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     # The program starts with root priveleges (weston/wayland doesn't like starting as non-root)
     # This drops the priveleges so we don't run unsafely.
-    drop_privileges('ups', 'ups')
+    drop_privileges('upscontrol', 'upscontrol')
 
     upsdisplayFrame = UpsDisplayFrame(None, wx.ID_ANY, "")
     UpsDisplay.SetTopWindow(upsdisplayFrame)
