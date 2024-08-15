@@ -9,12 +9,39 @@ import wx
 
 # begin wxGlade: extracode
 from wx.lib.mixins import listctrl
+import wx.lib.agw.ultimatelistctrl as ULC
 class TableListCtrl(wx.ListCtrl, listctrl.ListCtrlAutoWidthMixin):
-    def __init__(self, parent, ID, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=0):
+    def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
         wx.ListCtrl.__init__(self, parent, ID, pos, size, style)
         listctrl.ListCtrlAutoWidthMixin.__init__(self)
         self.setResizeColumn(0)
+
+class MyListCtrl(ULC.UltimateListCtrl):
+    def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
+        # super(MyListCtrl, self).__init__(id=ID, parent=parent, agwStyle=ULC.ULC_REPORT | ULC.ULC_HRULES)
+        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD)
+        self.rows = 0
+
+    def AppendColumn(self, header):
+        self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT, width=wx.LIST_AUTOSIZE)
+
+    def AppendRow(self, datalist):
+        print("Append: %s" % datalist)
+        for column in range(len(datalist)):
+            field = datalist[column]
+
+            if type(field) is list:
+                field = ",".join(field)
+            else:
+                field = "%s" % field
+
+            if column == 0:
+                self.InsertStringItem(self.rows, field)
+            else:
+                self.SetStringItem(self.rows, column, field)
+
+        self.rows = self.rows + 1
+        self.Refresh()
 # end wxGlade
 
 
@@ -41,14 +68,14 @@ class EditTable(wx.Dialog):
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        self.itemList = TableListCtrl(self, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
+        self.itemList = MyListCtrl(self, wx.ID_ANY, style=wx.LC_LIST)
         # Popluate the header
         for header in self.headers:
             self.itemList.AppendColumn(header)
         # Populate the rows
         for row in data:
-            self.itemList.Append([row[field] for field in self.fields])
-        mainSizer.Add(self.itemList, 1, wx.EXPAND, 0)
+            self.itemList.AppendRow([row[field] for field in self.fields])
+        mainSizer.Add(self.itemList, 1, wx.ALL | wx.EXPAND, 0)
 
         buttonSizer = wx.StdDialogButtonSizer()
         mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 4)
