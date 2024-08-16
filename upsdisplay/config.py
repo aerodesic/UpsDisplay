@@ -10,11 +10,12 @@ DEFAULT_CONFIG = {
             "name": str,                # name is a string
             "dns": str,                 # nns is a string (but should be smarter)
             "uri": str,                 # uri is a string (but should be smarter)
-            "requres": [ "<node>" ],    # requires is a list of <node names>
-            "wants": [ "<node>" ],      # wants is a list of <node names>
+            "requres": [ "<nodes>" ],   # requires is a list of <node names>
+            "wants": [ "<nodes>" ],     # wants is a list of <node names>
             "start": str,               # start is a string (action function)
             "stop": str,                # stop is a string (action function)
             "main": bool,               # main is a boolean (show on main page if True)
+            "choice": [ "Red", "Blue", "Green" ],  # A test object
         },
         "headers": {
             "name": "Name",
@@ -25,6 +26,7 @@ DEFAULT_CONFIG = {
             "start": "Start Action",
             "stop": "Stop Action",
             "main": "On Main Page",
+            "choice": "Choice",
         },
         "data": [{
             "name": "Nimbus",
@@ -35,6 +37,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": True,
+            "choice": None,
         },{
             "name": "Cumulus",
             "dns": "cumulus.aerodesic.net",
@@ -44,6 +47,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         },{
             "name": "Nas1",
             "dns": "nas1.aerodesic.net",
@@ -53,6 +57,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         },{
             "name": "Nas2",
             "dns": "nimbus.aerodesic.net",
@@ -62,6 +67,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         },{
             "name": "Nas3",
             "dns": "nas3.aerodesic.net",
@@ -71,6 +77,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         },{
             "name": "Gatekeeper",
             "dns": "gatekeeper.aerodesic.net",
@@ -80,6 +87,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         },{
             "name": "DmzSwitch",
             "dns": "",
@@ -89,6 +97,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         },{
             "name": "NasSwitch",
             "dns": "",
@@ -98,6 +107,7 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "main": False,
+            "choice": None,
         }],
     }
 }

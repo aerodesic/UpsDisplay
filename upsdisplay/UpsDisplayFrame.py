@@ -99,7 +99,7 @@ class UpsDisplayFrame(wx.Frame):
 
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         # Fields to display
-        fields=['name', 'uri', 'requires', 'wants', 'main']
+        fields=["name", "uri", "requires", "wants", "main", "choice"]
 
         dlg=EditTable(self, title="Edit Nodes", config=self.config["nodes"], fields=fields, editEntry=None)
         if dlg.ShowModal() == wx.ID_OK:
