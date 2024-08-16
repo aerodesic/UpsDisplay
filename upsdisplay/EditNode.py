@@ -8,22 +8,49 @@ import wx
 # end wxGlade
 
 # begin wxGlade: extracode
+from ShowMessage import *
+from TextCheckboxSelect import *
 # end wxGlade
 
 
 class EditNode(wx.Dialog):
-    def __init__(self, data=None, schema=None, *args, **kwds):
+    # The 'config' variable points to a base of a table defined by 'schema', 'headers' and 'data' entries.
+    def __init__(self, parent=None, config=None, schema=None, headers=None, data=None, *args, **kwds):
+        self.config = config   # Entire config reference
+        self.data = data       # Data for node being edited
+        self.schema = schema   # Schema for node being edited
+        self.headers = headers # Headers for node being edited
+
+        kwds["parent"] = parent
+
         # begin wxGlade: EditNode.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         wx.Dialog.__init__(self, *args, **kwds)
 
-        mainSizer = wx.FlexGridSizer(1, 2, 0, 0)
+        mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        mainSizer.Add((0, 0), 0, 0, 0)
+        self.itemSizer = wx.FlexGridSizer(0, 2, 5, 5)
+        mainSizer.Add(self.itemSizer, 1, wx.ALL | wx.EXPAND, 5)
 
         buttonSizer = wx.FlexGridSizer(1, 2, 0, 0)
-        mainSizer.Add(buttonSizer, 0, wx.ALL | wx.EXPAND, 4)
+        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 4)
 
+        # Generate edit items
+        rows=0
+        for field in self.headers:
+            schema = self.schema[field]
+            description = self.headers[field]
+            data = self.data[field]
+            static_text, control = self.create_edit_entry(schema, description, data)
+            if control is not None:
+                rows = rows + 1
+                self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+                self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
+        self.itemSizer.SetRows(rows)
+        self.Fit()
+        print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
+
+        # End of generated edit items
         self.buttonOk = wx.Button(self, wx.ID_ANY, _("OK"))
         self.buttonOk.SetDefault()
         buttonSizer.Add(self.buttonOk, 0, 0, 0)
@@ -31,6 +58,10 @@ class EditNode(wx.Dialog):
         self.buttonCancel = wx.Button(self, wx.ID_ANY, _("Cancel"))
         buttonSizer.Add(self.buttonCancel, 0, 0, 0)
 
+        self.itemSizer.AddGrowableCol(1)
+
+        mainSizer.AddGrowableRow(0)
+        mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
         mainSizer.Fit(self)
 
@@ -38,11 +69,127 @@ class EditNode(wx.Dialog):
         self.SetEscapeId(self.buttonCancel.GetId())
 
         self.Layout()
+        #self.Maximize()
+        self.Fit()
+        self.Layout()
+        self.SetTitle(self.data['name'])
 
         self.Bind(wx.EVT_BUTTON, self.OnOkButton, self.buttonOk)
         # end wxGlade
 
+    # Create and return the static text and edit field as a tuple
+    # Options for schema are:
+    # "<unique-node>",                                  name is a unique node name (not already defined)
+    # "<zero-or-more-node>"                             a list of zero or more nodes
+    # "<one-or-more-node>"                              a list of one or more nodes
+    # "<one-of-node>"                                   a list of one or more nodes
+    # "<str>",                                          any string
+    # "[ '<one-of>' 'item', 'item', 'item' ]            a choice of a single item
+    # "[ '<zero-or-more>' 'item', 'item', 'item' ]      a choice of zero or more items
+    # "[ '<one-or-more>' 'item', 'item', 'item' ]       a choice of one or more items
+    # "<bool>"                                          a selector of Yes or No with Yes being True
+    #
+    # Returns a tuple:
+    #    <static string with field label>, <control for editing results>
+    #
+    def create_edit_entry(self, schema, description, data):
+        # print("create_edit_entry: description %s" % (description))
+        # print("                   schema %s" % (schema))
+        # print("                   data %s" % (data))
+        # print("                   config %s" % (self.config))
+        control = None
+        static_text = None
+
+        if schema == "<unique-node>":
+            # Create a TextCtrl with an editing function to check for a unique node name
+            control = wx.TextCtrl(self, wx.ID_ANY, data)
+
+            # Create a list of current node names but remove the current node being edited from the list
+            list_of_nodes = [ node['name'] for node in self.config['data']]
+            list_of_nodes.remove(data)
+
+            # print("Removed %s from node list: %s" % (data, list_of_nodes))
+            control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
+
+        elif schema == "<zero-or-more-node>":
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data))
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxZeroOrMore(event, choices=[node['name'] for node in self.config['data']], selected=data))
+
+        elif schema == "<one-or-more-node>":
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data))
+            control.Bind(wx.EVT_LEFT_DOWN, self.OnCheckboxOneOrMore)
+
+        elif schema == "<one-of-node>":
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data))
+            control.Bind(wx.EVT_LEFT_DOWN, self.OnCheckboxOneOf)
+
+        elif schema == "<str>":
+            # Create a generic TextCtrl
+            pass
+
+        elif schema == "<bool>":
+            # Create a one-of for Yes/No and replace value with boolean
+            pass
+
+        elif type(schema) == list and len(schema) > 1:
+            # A list of items
+            if schema[0] == "<one-of":
+                # A choice of a single item of the following items
+                pass
+
+            elif schema[0] == "<zero-or-more>":
+                # Zero or more of the remaining items
+                pass
+
+            elif schema[0] == "<one-or-more>":
+                # One or more of the following items
+                pass
+
+        if control is None:
+            # dlg = ShowMessage("Weird error")
+            # dlg.ShowModal()
+            pass
+        else:
+            # Create the static text
+            static_text = wx.StaticText(self, label=description + ":")
+            
+        return static_text, control
+
+
+    # Process OK and put the data back into the configuration table entry identified by 'name'
     def OnOkButton(self, event):  # wxGlade: EditNode.<event_handler>
         print("Event handler 'OnOkButton' not implemented!")
         event.Skip()
+
+    def OnTextEnter(self, event):  # wxGlade: EditNode.<event_handler>
+        print("Event handler 'OnTextEnter' not implemented!")
+        event.Skip()
+
+    def OnCheckUniqueNodeName(self, event, invalid_names):
+        # print("OnCheckUniqueNodeName fired: %s" % invalid_names)
+        newname = event.GetEventObject().GetValue()
+        if newname in invalid_names:
+            msg = ShowMessage("%s is not a valid Node name" % newname)
+            msg.ShowModal()
+        else:
+            event.Skip()
+
+    # Bring up a checkbox dialog that allows any or none selection
+    def OnCheckboxZeroOrMore(self, event, choices, selected):
+        print("Event handler: OnCheckboxZeroOrMore")
+        dlg = TextCheckboxSelect(self, choose="zero-or-more", choices=choices, selected=selected)
+        if dlg.ShowModal() == wx.ID_OK:
+            pass
+        event.Skip()
+
+    # Bring up a checkbox dialog that requies one or more selection
+    def OnCheckboxOneOrMore(self, event):
+        print("Event handler: OnCheckboxOneOrMore")
+        pass
+
+    # Bring up a checkbox dialog that forces a single selection (i.e. deselects other selections automatically)
+    def OnCheckboxOneOf(self, event):
+        print("Event handler: OnCheckboxOneOf")
+        pass
 # end of class EditNode
+

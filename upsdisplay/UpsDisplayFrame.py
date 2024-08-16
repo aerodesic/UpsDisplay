@@ -9,6 +9,7 @@ import wx
 
 # begin wxGlade: extracode
 from EditTable import *
+from EditNode import *
 # end wxGlade
 
 
@@ -47,9 +48,6 @@ class UpsDisplayFrame(wx.Frame):
 
         topSizer = wx.FlexGridSizer(1, 0, 0, 0)
         self.mainSizer.Add(topSizer, 1, wx.ALL | wx.EXPAND, 5)
-
-        self.text_ctrl_1 = wx.TextCtrl(self.mainPanel, wx.ID_ANY, "", style=wx.TE_READONLY)
-        topSizer.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
 
         self.statusSizer = wx.FlexGridSizer(0, 2, 10, 0)
         self.mainSizer.Add(self.statusSizer, 1, wx.ALL | wx.EXPAND, 5)
@@ -101,7 +99,7 @@ class UpsDisplayFrame(wx.Frame):
         # Fields to display
         fields=["name", "uri", "requires", "wants", "main", "choice"]
 
-        dlg=EditTable(self, title="Edit Nodes", config=self.config["nodes"], fields=fields, editEntry=None)
+        dlg=EditTable(self, title="Edit Nodes", config=self.config["nodes"], fields=fields, editEntry=EditNode)
         if dlg.ShowModal() == wx.ID_OK:
             print(self.config["nodes"])
         event.Skip()

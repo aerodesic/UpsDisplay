@@ -7,15 +7,15 @@ DEFAULT_CONFIG = {
     ],
     "nodes": {
         "schema": {
-            "name": str,                # name is a string
-            "dns": str,                 # nns is a string (but should be smarter)
-            "uri": str,                 # uri is a string (but should be smarter)
-            "requres": [ "<nodes>" ],   # requires is a list of <node names>
-            "wants": [ "<nodes>" ],     # wants is a list of <node names>
-            "start": str,               # start is a string (action function)
-            "stop": str,                # stop is a string (action function)
-            "main": bool,               # main is a boolean (show on main page if True)
-            "choice": [ "Red", "Blue", "Green" ],  # A test object
+            "name": "<unique-node>",                # name is a unique node name
+            "dns": "<str>",                         # dns is a string (but should be smarter)
+            "uri": "<str>",                         # uri is a string (but should be smarter)
+            "requires": "<zero-or-more-node>",      # requires is a list of <node names>
+            "wants": "<zero-or-more-node>",         # wants is a list of <node names>
+            "start": "<str>",                       # start is a string (action function)
+            "stop": "<str>",                        # stop is a string (action function)
+            "main": "<bool>",                       # main is a boolean (show on main page if True)
+            "choice": [ "<one-of>" "Red", "Blue", "Green" ],   # A test object
         },
         "headers": {
             "name": "Name",

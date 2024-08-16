@@ -12,11 +12,15 @@ import wx
 
 
 class TextCheckboxSelect(wx.Dialog):
-    def __init__(self, parent=None, choose_one=False, choices=['a','b','c'], selected=[], title=None, *args, **kwds):
+    # choose can be 'zero-or-more', 'one-or-more' or 'any-one-of'
+    def __init__(self, parent=None, choose="zero-or-more",choices=['a','b','c'], selected=[], title=None, *args, **kwds):
         kwds['parent'] = parent
+        self.choose = choose
         self.choices = choices
         self.selected = selected
-        print("TextCheckboxSelect: choose_one %s" % choose_one)
+        print("TextCheckboxSelect: choose_one %s" % choose)
+        print("                    choices %s" % str(choices))
+        print("                    selected %s" % str(selected))
         # begin wxGlade: TextCheckboxSelect.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
@@ -28,8 +32,6 @@ class TextCheckboxSelect(wx.Dialog):
         self.choiceList.Clear()
         self.choiceList.InsertItems(self.choices, 0)
         self.choiceList.SetCheckedStrings(self.selected)
-        # oldstyle = self.choiceList.GetWindowStyle()
-        # self.choiceList.SetWindowStyle(oldstyle | wx.LB_SINGLE if choose_one else wx.LB_MULTIPLE)
         mainSizer.Add(self.choiceList, 1, wx.ALL | wx.EXPAND, 1)
 
         buttonSizer = wx.StdDialogButtonSizer()
@@ -58,10 +60,18 @@ class TextCheckboxSelect(wx.Dialog):
         self.Layout()
         mainSizer.Fit(self)
         self.Maximize()
+
+        self.Bind(wx.EVT_CHECKLISTBOX, self.OnCheckboxItemSelected, self.choiceList)
         # end wxGlade
 
     # Return the current selected items in the checkbox list
     def GetSelectedItems(self):
         return list(self.choiceList.GetCheckedStrings())
 
+    def OnCheckboxItemSelected(self, event):  # wxGlade: TextCheckboxSelect.<event_handler>
+        if "any-one-of" in self.choose:
+            # Deselect all other items in the checkbox
+            pass
+        print("Event handler 'OnCheckboxItemSelected' not implemented!")
+        event.Skip()
 # end of class TextCheckboxSelect

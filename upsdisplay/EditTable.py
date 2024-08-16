@@ -21,7 +21,7 @@ class TableListCtrl(wx.ListCtrl, listctrl.ListCtrlAutoWidthMixin):
 class MyListCtrl(ULC.UltimateListCtrl):
     def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
         # super(MyListCtrl, self).__init__(id=ID, parent=parent, agwStyle=ULC.ULC_REPORT | ULC.ULC_HRULES)
-        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD|ULC.ULC_HRULES|ULC.ULC_VRULES)
+        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD)
 
     def AppendColumn(self, header):
         self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT)
@@ -50,6 +50,7 @@ class MyListCtrl(ULC.UltimateListCtrl):
 class EditTable(wx.Dialog):
     def __init__(self, parent=None, title="Edit Table", config=None, fields=[], headers=[], editEntry=None, *args, **kwds):
         self.parent = parent
+        self.config = config
         self.data = deepcopy(config["data"])
         self.schema = config["schema"]
         self.fields = fields
@@ -114,18 +115,18 @@ class EditTable(wx.Dialog):
 
     # On selected item, open editEntry dialog
     def OnItemSelected(self, event):  # wxGlade: EditTable.<event_handler>
-        print("OnItemSelected: %s" % event.GetEventObject())
         item = event.GetEventObject()
         row = event.GetIndex()
-        print("OnItemSelected: item is %s index is %d" % (str(item), row))
-        print("Item data is %s text is %s" % (str(item.GetItem(row)), item.GetItem(row).GetText()))
         itemdata = deepcopy(self.data[row])
-        print("Item data is %s" % itemdata)
-        print("Item data schema is %s" % self.schema)
+        name = item.GetItem(row).GetText()
+        # print("OnItemSelected: item is %s index is %d" % (str(item), row))
+        # print("Item data is %s name is %s" % (str(item.GetItem(row)), item.GetItem(row).GetText()))
+        # print("Item data is %s" % itemdata)
+        # print("Item data schema is %s" % self.schema)
 
         if self.editEntry is not None:
-            # item = event.GetEventObject()
-            dlg = self.editEntry(self, item, schema=self.schema, data=itemdata)
+            # Must pass original headers 'dict' to get mappings
+            dlg = self.editEntry(self, config=self.config, schema=self.schema, headers=self.config["headers"], data=itemdata)
             if dlg.ShowModal() is wx.ID_OK:
                 # Change the parent data element with the results
                 if dlg.IsDataChanged():
