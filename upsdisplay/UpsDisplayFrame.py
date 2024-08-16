@@ -35,74 +35,104 @@ class UpsDisplayFrame(wx.Frame):
 
     DEFAULT_CONFIG = {
         'global': {
+            # Global configuration goes here
         },
-        'available': [],
-        'nodes': [{
-                'name': 'Nimbus',
-                'dns': "nimbus.aerodesic.net",
-                'uri': 'APC:1',
-                'requires': ["Nas3"],
-                'wants': ["Nas1", "Nas2"],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "Cumulus",
-                'dns': "cumulus.aerodesic.net",
-                'uri': 'APC:2',
-                'requires': ["Nas3"],
-                'wants': [],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "Nas1",
-                'dns': "nas1.aerodesic.net",
-                'uri': 'APC:3',
-                'requires': ["Nas3"],
-                'wants': [],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "Nas2",
-                'dns': "nimbus.aerodesic.net",
-                'uri': 'APC:4',
-                'requires': ["Nas3"],
-                'wants': [],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "Nas3",
-                'dns': "nas3.aerodesic.net",
-                'uri': 'APC:5',
-                'requires': [],
-                'wants': ["Gatekeeper"],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "Gatekeeper",
-                'dns': 'gatekeeper.aerodesic.net',
-                'uri': 'APC:6',
-                'requires': [ "DmzSwitch", "NasSwitch" ],
-                'wants': [],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "DmzSwitch",
-                'dns': '',
-                'uri': 'APC:7',
-                'requires': [],
-                'wants': [],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },{
-                'name': "NasSwitch",
-                'dns': '',
-                'uri': 'APC:8',
-                'requires': [],
-                'wants': [],
-                'start': 'apcstart',
-                'stop': 'apcstop',
-            },
+        'available': [
+            # List of available devices seen by scanner
         ],
+        'nodeschema': {
+            'name': str,                # name is a string
+            'dns': str,                 # nns is a string (but should be smarter)
+            'uri': str,                 # uri is a string (but should be smarter)
+            'requres': [ "<node>" ],    # requires is a list of <node names>
+            'wants': [ "<node>" ],      # wants is a list of <node names>
+            'start': str,               # start is a string (action function)
+            'stop': str,                # stop is a string (action function)
+            'main': bool,               # main is a boolean (show on main page if True)
+        },
+        'nodeheaders': {
+            'name': "Name",
+            'dns': "Dns",
+            'uri': "URI",
+            'requires': "Requires",
+            'wants': "Wants",
+            'start': "Start Action",
+            'stop': "Stop Action",
+            'main': "On Main Page",
+        },
+        'nodedata': [{
+            'name': 'Nimbus',
+            'dns': "nimbus.aerodesic.net",
+            'uri': 'APC1:1',
+            'requires': ["Nas3"],
+            'wants': ["Nas1", "Nas2"],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': True,
+        },{
+            'name': "Cumulus",
+            'dns': "cumulus.aerodesic.net",
+            'uri': 'APC1:2',
+            'requires': ["Nas3"],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        },{
+            'name': "Nas1",
+            'dns': "nas1.aerodesic.net",
+            'uri': 'APC1:3',
+            'requires': ["Nas3"],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        },{
+            'name': "Nas2",
+            'dns': "nimbus.aerodesic.net",
+            'uri': 'APC1:4',
+            'requires': ["Nas3"],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        },{
+            'name': "Nas3",
+            'dns': "nas3.aerodesic.net",
+            'uri': 'APC1:5',
+            'requires': [],
+            'wants': ["Gatekeeper"],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        },{
+            'name': "Gatekeeper",
+            'dns': 'gatekeeper.aerodesic.net',
+            'uri': 'APC1:6',
+            'requires': [ "DmzSwitch", "NasSwitch" ],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        },{
+            'name': "DmzSwitch",
+            'dns': '',
+            'uri': 'APC1:7',
+            'requires': [],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        },{
+            'name': "NasSwitch",
+            'dns': '',
+            'uri': 'APC1:8',
+            'requires': [],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+            'main': False,
+        }],
     }
 
     def __init__(self, *args, **kwds):
@@ -170,7 +200,13 @@ class UpsDisplayFrame(wx.Frame):
         event.Skip()
 
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        dlg=EditTable(self, data=self.config['nodes'],  fields=['name', 'uri', 'requires', 'wants'], headers=['Node', 'Uri', 'Requires', 'Wants'], editEntry=None)
+        # Fields to display
+        fields=['name', 'uri', 'requires', 'wants', 'main']
+
+        # Headers for the fields to display
+        headers=[self.config['nodeheaders'][node] for node in fields]
+
+        dlg=EditTable(self, title="Edit Nodes", data=self.config['nodedata'],  schema=self.config['nodeschema'], fields=fields, headers=headers, editEntry=None)
         if dlg.ShowModal() == wx.ID_OK:
             print(self.config[Nodes])
         event.Skip()

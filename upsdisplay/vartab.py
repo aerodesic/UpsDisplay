@@ -1,5 +1,77 @@
 # A very simple hierachical data storage
 
+DEFAULT_CONFIG = {
+    'global': {
+    },
+    'available': [],
+    'nodes': [{
+        'name': 'Nimbus',
+            'dns': "nimbus.aerodesic.net",
+            'uri': 'APC:1',
+            'requires': ["Nas3"],
+            'wants': ["Nas1", "Nas2"],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+         },{
+         'name': "Cumulus",
+            'dns': "cumulus.aerodesic.net",
+            'uri': 'APC:2',
+            'requires': ["Nas3"],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+         },{
+            'name': "Nas1",
+            'dns': "nas1.aerodesic.net",
+            'uri': 'APC:3',
+            'requires': ["Nas3"],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+        },{
+            'name': "Nas2",
+            'dns': "nimbus.aerodesic.net",
+            'uri': 'APC:4',
+            'requires': ["Nas3"],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+        },{
+            'name': "Nas3",
+            'dns': "nas3.aerodesic.net",
+            'uri': 'APC:5',
+            'requires': [],
+            'wants': ["Gatekeeper"],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+        },{
+            'name': "Gatekeeper",
+            'dns': 'gatekeeper.aerodesic.net',
+            'uri': 'APC:6',
+            'requires': [ "DmzSwitch", "NasSwitch" ],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+        },{
+            'name': "DmzSwitch",
+            'dns': '',
+            'uri': 'APC:7',
+            'requires': [],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+        },{
+            'name': "NasSwitch",
+            'dns': '',
+            'uri': 'APC:8',
+            'requires': [],
+            'wants': [],
+            'start': 'apcstart',
+            'stop': 'apcstop',
+        },
+    ],
+}
+
 class VarTabException(Exception):
     pass
 
@@ -15,8 +87,8 @@ class VarTab():
     def Reset(self):
         self.Load({})
 
-    def FindValue(self, varname, base=None, write=False):
-        varvalue = self.__data if base is None else base
+    def FindValue(self, varname, subvar=None, write=False):
+        varvalue = self.__data if subvar is None else subvar
 
         for piece in varname.split("."):
             # print("FindValue: piece %s varvalue %s" % (piece, varvalue))
@@ -38,14 +110,14 @@ class VarTab():
 
     # Return a value if present, else exception thrown for undefined
     # If no value given, returns entire tree
-    def GetValue(self, varname="", base=None, evaluate=True, recursion=0):
+    def GetValue(self, varname="", subvar=None, evaluate=True, recursion=0):
         if recursion > self.MAX_RECURSION:
             raise VarTabException("recursion overflow looking for %s" % (varname))
 
         if varname == "":
-            return self.__data if base is None else base
+            return self.__data if subvar is None else subvar
 
-        value = self.FindValue(varname, base=base)
+        value = self.FindValue(varname, subvar=subvar)
 
         if evaluate:
             # Process any macros in the varname
@@ -77,13 +149,13 @@ class VarTab():
 
         return value
 
-    def SetValue(self, varname, value, base=None, protect=True):
+    def SetValue(self, varname, value, subvar=None, protect=True):
         try:
             first, last = varname.rsplit('.', maxsplit=1)
-            subvar = self.FindValue(first, base=base, write=True)
+            subvar = self.FindValue(first, subvar=subvar, write=True)
 
         except:
-            subvar = self.__data if base is None else base
+            subvar = self.__data if subvar is None else subvar
             last = varname
 
         if protect and last in subvar and (subvar[last].find("$eval{") >= 0 or subvar[last].find("${") >= 0):

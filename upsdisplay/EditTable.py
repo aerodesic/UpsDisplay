@@ -11,6 +11,7 @@ import wx
 from wx.lib.mixins import listctrl
 import wx.lib.agw.ultimatelistctrl as ULC
 import sys
+from copy import deepcopy
 class TableListCtrl(wx.ListCtrl, listctrl.ListCtrlAutoWidthMixin):
     def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
         wx.ListCtrl.__init__(self, parent, ID, pos, size, style)
@@ -20,7 +21,7 @@ class TableListCtrl(wx.ListCtrl, listctrl.ListCtrlAutoWidthMixin):
 class MyListCtrl(ULC.UltimateListCtrl):
     def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
         # super(MyListCtrl, self).__init__(id=ID, parent=parent, agwStyle=ULC.ULC_REPORT | ULC.ULC_HRULES)
-        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD)
+        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD|ULC.ULC_HRULES|ULC.ULC_VRULES)
 
     def AppendColumn(self, header):
         self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT)
@@ -47,19 +48,20 @@ class MyListCtrl(ULC.UltimateListCtrl):
 # editEntry is an optional dialog used to edit a table entry
 #
 class EditTable(wx.Dialog):
-    def __init__(self, parent=None, data={}, fields=[], headers=[], editEntry=None, *args, **kwds):
+    def __init__(self, parent=None, title="Edit Table", data=None, schema=None, fields=[], headers=[], editEntry=None, *args, **kwds):
         self.parent = parent
-        self.data = data
+        self.data = deepcopy(data)
+        self.schema = schema
         self.fields = fields
         self.headers = headers
         self.editEntry = editEntry
+        self.datachanged = False
 
         kwds['parent'] = parent
 
         # begin wxGlade: EditTable.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         wx.Dialog.__init__(self, *args, **kwds)
-        self.SetTitle(_("dialog"))
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
@@ -76,44 +78,74 @@ class EditTable(wx.Dialog):
         self.itemList.SetColumnWidth(len(self.headers) - 1, width=-3) #AUTOSIZE_FILL last column
         mainSizer.Add(self.itemList, 1, wx.ALL | wx.EXPAND, 0)
 
-        buttonSizer = wx.StdDialogButtonSizer()
-        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 4)
+        buttonSizer = wx.FlexGridSizer(1, 4, 0, 0)
+        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        self.button_OK = wx.Button(self, wx.ID_OK, "")
-        self.button_OK.SetDefault()
-        buttonSizer.AddButton(self.button_OK)
+        self.buttonOk = wx.Button(self, wx.ID_OK, "")
+        buttonSizer.Add(self.buttonOk, 0, 0, 0)
 
-        self.button_CANCEL = wx.Button(self, wx.ID_CANCEL, "")
-        buttonSizer.AddButton(self.button_CANCEL)
+        self.buttonCancel = wx.Button(self, wx.ID_CANCEL, "")
+        buttonSizer.Add(self.buttonCancel, 0, 0, 0)
 
-        buttonSizer.Realize()
+        self.buttonNew = wx.Button(self, wx.ID_ADD, "")
+        buttonSizer.Add(self.buttonNew, 0, 0, 0)
+
+        self.buttonDelete = wx.Button(self, wx.ID_DELETE, "")
+        buttonSizer.Add(self.buttonDelete, 0, 0, 0)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
         mainSizer.Fit(self)
 
-        self.SetAffirmativeId(self.button_OK.GetId())
-        self.SetEscapeId(self.button_CANCEL.GetId())
+        self.SetAffirmativeId(self.buttonOk.GetId())
+        self.SetEscapeId(self.buttonCancel.GetId())
 
         self.Layout()
         self.Maximize()
         self.Fit()
         self.Layout()
+        self.SetTitle(title)
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.itemList)
+        self.Bind(wx.EVT_BUTTON, self.OnAddButton, self.buttonNew)
+        self.Bind(wx.EVT_BUTTON, self.OnDeleteButton, self.buttonDelete)
         # end wxGlade
 
     # On selected item, open editEntry dialog
     def OnItemSelected(self, event):  # wxGlade: EditTable.<event_handler>
         print("OnItemSelected: %s" % event.GetEventObject())
+        item = event.GetEventObject()
+        row = event.GetIndex()
+        print("OnItemSelected: item is %s index is %d" % (str(item), row))
+        print("Item data is %s text is %s" % (str(item.GetItem(row)), item.GetItem(row).GetText()))
+        itemdata = deepcopy(self.data[row])
+        print("Item data is %s" % itemdata)
+        print("Item data schema is %s" % self.schema)
+
         if self.editEntry is not None:
-            item = event.GetEventObject()
-            dlg = self.editEntry(self, entry)
+            # item = event.GetEventObject()
+            dlg = self.editEntry(self, item, schema=self.schema, data=itemdata)
             if dlg.ShowModal() is wx.ID_OK:
                 # Change the parent data element with the results
-                pass
+                if dlg.IsDataChanged():
+                    self.data[row] = dlg.GetData()
+                    self.datachanged = True
                 
         event.Skip()
+
+    def OnAddButton(self, event):  # wxGlade: EditTable.<event_handler>
+        print("Event handler 'OnAddButton' not implemented!")
+        event.Skip()
+
+    def OnDeleteButton(self, event):  # wxGlade: EditTable.<event_handler>
+        print("Event handler 'OnDeleteButton' not implemented!")
+        event.Skip()
+
+    def IsDataChanged(self):
+        return self.datachanged
+
+    def GetData(self):
+        return self.data
 
 # end of class EditTable
