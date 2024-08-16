@@ -30,113 +30,11 @@ from ConfigDialog import *
 
 CONFIGFILE = ".upsdisplay"
 
+from config import DEFAULT_CONFIG
 
 class UpsDisplayFrame(wx.Frame):
-
-    DEFAULT_CONFIG = {
-        'global': {
-            # Global configuration goes here
-        },
-        'available': [
-            # List of available devices seen by scanner
-        ],
-        'nodeschema': {
-            'name': str,                # name is a string
-            'dns': str,                 # nns is a string (but should be smarter)
-            'uri': str,                 # uri is a string (but should be smarter)
-            'requres': [ "<node>" ],    # requires is a list of <node names>
-            'wants': [ "<node>" ],      # wants is a list of <node names>
-            'start': str,               # start is a string (action function)
-            'stop': str,                # stop is a string (action function)
-            'main': bool,               # main is a boolean (show on main page if True)
-        },
-        'nodeheaders': {
-            'name': "Name",
-            'dns': "Dns",
-            'uri': "URI",
-            'requires': "Requires",
-            'wants': "Wants",
-            'start': "Start Action",
-            'stop': "Stop Action",
-            'main': "On Main Page",
-        },
-        'nodedata': [{
-            'name': 'Nimbus',
-            'dns': "nimbus.aerodesic.net",
-            'uri': 'APC1:1',
-            'requires': ["Nas3"],
-            'wants': ["Nas1", "Nas2"],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': True,
-        },{
-            'name': "Cumulus",
-            'dns': "cumulus.aerodesic.net",
-            'uri': 'APC1:2',
-            'requires': ["Nas3"],
-            'wants': [],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        },{
-            'name': "Nas1",
-            'dns': "nas1.aerodesic.net",
-            'uri': 'APC1:3',
-            'requires': ["Nas3"],
-            'wants': [],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        },{
-            'name': "Nas2",
-            'dns': "nimbus.aerodesic.net",
-            'uri': 'APC1:4',
-            'requires': ["Nas3"],
-            'wants': [],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        },{
-            'name': "Nas3",
-            'dns': "nas3.aerodesic.net",
-            'uri': 'APC1:5',
-            'requires': [],
-            'wants': ["Gatekeeper"],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        },{
-            'name': "Gatekeeper",
-            'dns': 'gatekeeper.aerodesic.net',
-            'uri': 'APC1:6',
-            'requires': [ "DmzSwitch", "NasSwitch" ],
-            'wants': [],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        },{
-            'name': "DmzSwitch",
-            'dns': '',
-            'uri': 'APC1:7',
-            'requires': [],
-            'wants': [],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        },{
-            'name': "NasSwitch",
-            'dns': '',
-            'uri': 'APC1:8',
-            'requires': [],
-            'wants': [],
-            'start': 'apcstart',
-            'stop': 'apcstop',
-            'main': False,
-        }],
-    }
-
     def __init__(self, *args, **kwds):
-        self.config = self.DEFAULT_CONFIG
+        self.config = DEFAULT_CONFIG
 
         # begin wxGlade: UpsDisplayFrame.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.MAXIMIZE | wx.STAY_ON_TOP
