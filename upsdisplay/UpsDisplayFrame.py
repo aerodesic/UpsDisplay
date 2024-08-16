@@ -101,12 +101,9 @@ class UpsDisplayFrame(wx.Frame):
         # Fields to display
         fields=['name', 'uri', 'requires', 'wants', 'main']
 
-        # Headers for the fields to display
-        headers=[self.config['nodeheaders'][node] for node in fields]
-
-        dlg=EditTable(self, title="Edit Nodes", data=self.config['nodedata'],  schema=self.config['nodeschema'], fields=fields, headers=headers, editEntry=None)
+        dlg=EditTable(self, title="Edit Nodes", config=self.config["nodes"], fields=fields, editEntry=None)
         if dlg.ShowModal() == wx.ID_OK:
-            print(self.config[Nodes])
+            print(self.config["nodes"])
         event.Skip()
 
     def OnDevicesConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>

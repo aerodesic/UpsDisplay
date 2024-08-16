@@ -48,12 +48,12 @@ class MyListCtrl(ULC.UltimateListCtrl):
 # editEntry is an optional dialog used to edit a table entry
 #
 class EditTable(wx.Dialog):
-    def __init__(self, parent=None, title="Edit Table", data=None, schema=None, fields=[], headers=[], editEntry=None, *args, **kwds):
+    def __init__(self, parent=None, title="Edit Table", config=None, fields=[], headers=[], editEntry=None, *args, **kwds):
         self.parent = parent
-        self.data = deepcopy(data)
-        self.schema = schema
+        self.data = deepcopy(config["data"])
+        self.schema = config["schema"]
         self.fields = fields
-        self.headers = headers
+        self.headers = [config["headers"][node] for node in fields]
         self.editEntry = editEntry
         self.datachanged = False
 
@@ -70,7 +70,7 @@ class EditTable(wx.Dialog):
         for header in self.headers:
             self.itemList.AppendColumn(header)
         # Populate the rows
-        for row in data:
+        for row in self.data:
             self.itemList.AppendRow([row[field] for field in self.fields])
         # Force autosize columns
         for col in range(0, len(self.headers) - 1):
