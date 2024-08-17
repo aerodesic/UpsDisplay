@@ -36,7 +36,6 @@ from config import DEFAULT_CONFIG
 
 class UpsDisplayFrame(wx.Frame):
     def __init__(self, *args, **kwds):
-        self.config = DEFAULT_CONFIG
 
         # begin wxGlade: UpsDisplayFrame.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.MAXIMIZE | wx.STAY_ON_TOP
@@ -97,20 +96,34 @@ class UpsDisplayFrame(wx.Frame):
         event.Skip()
 
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        # Fields to display
-        fields=["name", "uri", "requires", "wants", "main", "choice", "one-or-more-node", "one-of-node"]
+        config = self.GetConfig()
 
-        dlg=EditTable(self, title="Edit Nodes", config=self.config["nodes"], fields=fields, editEntry=EditNode)
+        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"], table_fields=config['nodes']['table_fields'], edit_fields=config['nodes']['edit_fields'], editEntry=EditNode)
         if dlg.ShowModal() == wx.ID_OK:
             print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
             if dlg.IsDataChanged():
-                print("Before: %s" % json.dumps(dlg.GetResults(), indent=4, sort_keys=True))
-                self.config['nodes']['data'] = dlg.GetResults()
-                print("After: %s" % json.dumps(dlg.GetResults(), indent=4, sort_keys=True))
+                config['nodes']['data'] = dlg.GetResults()
+                self.PutConfig(config)
         event.Skip()
 
     def OnDevicesConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         print("Event handler 'OnDevicesConfigButton' not implemented!")
         event.Skip()
+
+    def GetConfig(self):
+        try:
+            with open(CONFIGFILE, "r") as f:
+                config = json.load(f)
+        except:
+            config = DEFAULT_CONFIG
+        return config
+
+    def PutConfig(self, config):
+        try:
+            with open(CONFIGFILE, "w") as f:
+                f.write(json.dumps(config, indent=4, sort_keys=True))
+        except Exception as e:
+            print("PutConfig: %s" % str(e))
+        
 # end of class UpsDisplayFrame
 

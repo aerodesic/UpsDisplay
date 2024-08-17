@@ -15,11 +15,12 @@ from TextCheckboxSelect import *
 
 class EditNode(wx.Dialog):
     # The 'config' variable points to a base of a table defined by 'schema', 'headers' and 'data' entries.
-    def __init__(self, parent=None, config=None, schema=None, headers=None, data=None, *args, **kwds):
+    def __init__(self, parent=None, config=None, edit_fields=[], schema=None, headers=None, data=None, *args, **kwds):
         self.config = config   # Entire config reference
         self.data = data       # Data for node being edited
         self.schema = schema   # Schema for node being edited
         self.headers = headers # Headers for node being edited
+        self.edit_fields = edit_fields
 
         self.data_changed = False
 
@@ -39,12 +40,14 @@ class EditNode(wx.Dialog):
 
         # Generate edit items
         rows=0
-        for field in self.headers:
+        print("data is %s" % self.data)
+        for field in self.edit_fields:
             schema = self.schema[field]
             description = self.headers[field]
             static_text, control = self.create_edit_entry(schema, description, field)
             if control is not None:
                 rows = rows + 1
+                print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))
                 self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
                 self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
 
@@ -102,6 +105,7 @@ class EditNode(wx.Dialog):
         control = None
         static_text = None
 
+        print("create_edit_entry: schema '%s' description '%s' name '%s' data '%s'" % (schema, description, name, self.data[name]))
         if schema == "<unique-node>":
             # Create a TextCtrl with an editing function to check for a unique node name
             control = wx.TextCtrl(self, wx.ID_ANY, self.data[name])
@@ -114,20 +118,21 @@ class EditNode(wx.Dialog):
             control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
 
         elif schema == "<zero-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more"))
+            # control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]))
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more", title="Zero or more nodes"))
 
         elif schema == "<one-or-more-node>":
             control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more"))
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more", title="One or more nodes"))
 
         elif schema == "<one-of-node>":
             control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']]))
 
         elif schema == "<str>":
-            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data['name']), name=name)
-            pass
+            # control = wx.TextCtrl(self, wx.ID_ANY, str(self.data['name']), name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]))
 
         elif schema == "<bool>":
             # Create a one-of for Yes/No and replace value with boolean
@@ -177,11 +182,11 @@ class EditNode(wx.Dialog):
             event.Skip()
 
     # Bring up a checkbox dialog that allows any or none selection
-    def OnCheckboxMultiple(self, event, choices, choose):
+    def OnCheckboxMultiple(self, event, choices, choose, title):
         item = event.GetEventObject()
         selected = self.data[item.GetName()]
-        print("Event handler: OnCheckboxZeroOrMore")
-        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName()], title="Zero or more nodes")
+        print("Event handler: OnCheckboxMultiple")
+        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName()], title=title)
         if dlg.ShowModal() == wx.ID_OK:
             # Put the seletions back into the object
             items = dlg.GetSelectedItems()

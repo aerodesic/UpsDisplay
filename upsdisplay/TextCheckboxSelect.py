@@ -68,16 +68,15 @@ class TextCheckboxSelect(wx.Dialog):
         return list(self.choiceList.GetCheckedStrings())
 
     def OnCheckboxItemSelected(self, event):  # wxGlade: TextCheckboxSelect.<event_handler>
-        veto = False
         item = event.GetEventObject()
-        if "one-of" in self.choose:
+        if self.choose == "one-of":
             # Deselect all other items in the checkbox
             selected = event.GetSelection()
             item.SetCheckedItems([selected])
-        elif "one-or-more":
+        elif self.choose == "one-or-more":
             # If no items left selected, reselect this last deselected item
             print("Number of items selected: %s  this selectioni %d" % (item.GetSelections(), event.GetSelection()))
-            if len(item.GetChecked()) == 0:
+            if len(item.GetCheckedItems()) == 0:
                 item.SetCheckedItems([event.GetSelection()])
         else:
             # Zero or more - no more editing

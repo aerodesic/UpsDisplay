@@ -18,29 +18,28 @@ class ShowMessage(wx.Dialog):
         # begin wxGlade: ShowMessage.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         wx.Dialog.__init__(self, *args, **kwds)
+        self.SetSize((300, 200))
         self.SetTitle(_("Error"))
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        self.message_body = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.message_body = wx.TextCtrl(self, wx.ID_ANY, _("Message goes here"), style=wx.TE_CENTRE | wx.TE_MULTILINE | wx.TE_READONLY)
         self.message_body.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 0, "Ubuntu"))
         self.message_body.SetValue(message)
         if heading is not None:
             self.SetTitle(heading)
-        mainSizer.Add(self.message_body, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL | wx.EXPAND, 0)
+        mainSizer.Add(self.message_body, 0, wx.ALL | wx.EXPAND, 0)
 
         buttonSizer = wx.FlexGridSizer(1, 1, 0, 0)
         mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 4)
 
         self.buttonOK = wx.Button(self, wx.ID_OK, "")
         self.buttonOK.SetDefault()
-        self.Maximize()
         buttonSizer.Add(self.buttonOK, 0, 0, 0)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
 
         self.SetAffirmativeId(self.buttonOK.GetId())
 

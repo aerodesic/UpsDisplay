@@ -33,6 +33,45 @@ DEFAULT_CONFIG = {
             "one-or-more-node": "One or More Nodes",
             "one-of-node": "One of Node",
         },
+        # Include these in the table shown for configuration, in order of display
+        'table_fields': [
+            'name',
+            "uri",
+            "requires",
+            "wants",
+            "main",
+            "choice",
+            "one-or-more-node",
+            "one-of-node"
+        ],
+        # Include these in the detailed edit dialog, in order of display
+        'edit_fields': [
+            'name',
+            'dns',
+            'uri',
+            'requires',
+            'wants',
+            'start',
+            'stop',
+            'main',
+            'choice',
+            'one-or-more-node',
+            'one-of-node'
+        ],
+        # A default setting when creating a new entry
+        'default': {
+            "name": None,
+            "dns": "",
+            "uri": "",
+            "requires": [],
+            "wants": [],
+            "start": "",
+            "stop": "",
+            "main": False,
+            "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
+        },
         "data": [{
             "name": "Nimbus",
             "dns": "nimbus.aerodesic.net",

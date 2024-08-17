@@ -7,6 +7,8 @@ import wx
 # begin wxGlade: dependencies
 # end wxGlade
 
+from ShowMessage import *
+
 # begin wxGlade: extracode
 from wx.lib.mixins import listctrl
 import wx.lib.agw.ultimatelistctrl as ULC
@@ -49,18 +51,20 @@ class MyListCtrl(ULC.UltimateListCtrl):
 
 #
 # data is the base of the config tree of data to be selected as a table
-# fields is the fields within each data element that will be displayed in the list
+# table_fields is the fields within each data element that will be displayed in the list
+# edit_fields is passed to the editEntry dialog to define the total fields for editing
 # headers is the display-form of the field name (e.g. field='name' header='Node'
 # editEntry is an optional dialog used to edit a table entry
 #
 class EditTable(wx.Dialog):
-    def __init__(self, parent=None, title="Edit Table", config=None, fields=[], headers=[], editEntry=None, *args, **kwds):
+    def __init__(self, parent=None, title="Edit Table", config=None, table_fields=[], edit_fields=[], headers=[], editEntry=None, *args, **kwds):
         self.parent = parent
         self.config = config
         self.data = deepcopy(config["data"])
         self.schema = config["schema"]
-        self.fields = fields
-        self.headers = [config["headers"][node] for node in fields]
+        self.table_fields = table_fields
+        self.edit_fields = edit_fields
+        self.headers = [config["headers"][node] for node in table_fields]
         self.editEntry = editEntry
         self.data_changed = False
 
@@ -79,19 +83,10 @@ class EditTable(wx.Dialog):
 
         # Populate the rows
         for row in self.data:
-            self.itemList.AppendRow([row[field] for field in self.fields])
+            self.itemList.AppendRow([row[field] for field in self.table_fields])
 
         # Force autosize columns
         self.itemList.UpdateColumnWidths()
-        #for col in range(0, len(self.headers) - 1):
-        #    self.itemList.SetColumnWidth(col, width=wx.LIST_AUTOSIZE)
-        #    datawidth = self.itemList.GetColumnWidth(col)
-        #    self.itemList.SetColumnWidth(col, width=wx.LIST_AUTOSIZE_USEHEADER)
-        #    hdrwidth = self.itemList.GetColumnWidth(col)
-        #    if hdrwidth < datawidth:
-        #        self.itemList.SetColumnWidth(col, datawidth)
-
-        self.itemList.SetColumnWidth(len(self.headers) - 1, width=-3) #AUTOSIZE_FILL last column
         mainSizer.Add(self.itemList, 1, wx.ALL | wx.EXPAND, 0)
 
         buttonSizer = wx.FlexGridSizer(1, 4, 0, 0)
@@ -133,15 +128,10 @@ class EditTable(wx.Dialog):
         item = event.GetEventObject()
         row = event.GetIndex()
         itemdata = deepcopy(self.data[row])
-        name = item.GetItem(row).GetText()
-        # print("OnItemSelected: item is %s index is %d" % (str(item), row))
-        # print("Item data is %s name is %s" % (str(item.GetItem(row)), item.GetItem(row).GetText()))
-        # print("Item data is %s" % itemdata)
-        # print("Item data schema is %s" % self.schema)
 
         if self.editEntry is not None:
             # Must pass original headers 'dict' to get mappings
-            dlg = self.editEntry(self, config=self.config, schema=self.schema, headers=self.config["headers"], data=itemdata)
+            dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.config["headers"], data=itemdata)
             if dlg.ShowModal() == wx.ID_OK:
                 # Change the parent data element with the results
                 print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
@@ -149,8 +139,8 @@ class EditTable(wx.Dialog):
                     results = dlg.GetResults()
                     # Refill this row's data
                     # self.itemList.SetColumnData(row, 
-                    for column in range(len(self.fields)):
-                        self.itemList.SetColumnData(row, column, results[self.fields[column]])
+                    for column in range(len(self.table_fields)):
+                        self.itemList.SetColumnData(row, column, results[self.table_fields[column]])
                     self.itemList.UpdateColumnWidths()
                     self.data[row] = results
                     self.data_changed = True
@@ -159,8 +149,43 @@ class EditTable(wx.Dialog):
                 
         event.Skip()
 
+    # Add an item into the table
     def OnAddButton(self, event):  # wxGlade: EditTable.<event_handler>
-        print("Event handler 'OnAddButton' not implemented!")
+        if self.editEntry is not None:
+            # Must pass original headers 'dict' to get mappings
+            itemdata = deepcopy(self.config['default'])
+            itemdata['name'] = ""
+            # Temporarily place into config table
+            row = len(self.config['data'])
+            self.config['data'].append(itemdata)
+            dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.config["headers"], data=itemdata)
+            if dlg.ShowModal() == wx.ID_OK:
+                # Change the parent data element with the results
+                print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
+                if dlg.IsDataChanged():
+                    results = dlg.GetResults()
+                    if len(results['name']) == 0:
+                        print("Name length is empty")
+                        dlg = ShowMessage("Name field is empty")
+                        dlg.ShowModal()
+
+                    elif results['name'] in [ field['name'] for field in self.config['data']]:
+                        print("Name already in use")
+                        dlg = ShowMessage("Name already in use")
+                        dlg.ShowModal()
+
+                    else:
+                        # Refill this row's data
+                        # self.itemList.SetColumnData(row, 
+                        for column in range(len(self.table_fields)):
+                            self.itemList.SetColumnData(row, column, results[self.table_fields[column]])
+                        self.itemList.UpdateColumnWidths()
+                        self.data[row] = results
+                        self.data_changed = True
+            else:
+                # Delete the data row
+                del(self.config['data'][row])
+                print("editEntry failed")
         event.Skip()
 
     def OnDeleteButton(self, event):  # wxGlade: EditTable.<event_handler>
