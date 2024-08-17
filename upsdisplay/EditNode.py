@@ -118,23 +118,24 @@ class EditNode(wx.Dialog):
             control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
 
         elif schema == "<zero-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name="Txt-%s" % name)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more", title="Zero or more nodes"))
 
         elif schema == "<one-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name="Txt-%s" % name)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more", title="One or more nodes"))
 
         elif schema == "<one-of-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name="Txt-%s" % name)
+            data = self.data[name]
+            control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']]))
 
         elif schema == "<str>":
-            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data['name']), name="Txt-%s" % name)
+            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
 
         elif schema == "<bool>":
             # Create a one-of for Yes/No and replace value with boolean
-            control = wx.TextCtrl(self, wx.ID_ANY, "Yes" if self.data[name] else "No", name="Txt-%s" % name)
+            control = wx.TextCtrl(self, wx.ID_ANY, "Yes" if self.data[name] else "No", name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxBoolean(event, choices=["Yes", "No"]))
 
         elif type(schema) == list and len(schema) > 1:
@@ -183,16 +184,16 @@ class EditNode(wx.Dialog):
     # Bring up a checkbox dialog that allows any or none selection
     def OnCheckboxMultiple(self, event, choices, choose, title):
         item = event.GetEventObject()
-        selected = self.data[item.GetName().split('-')[1]]
+        selected = self.data[item.GetName()]
         print("Event handler: OnCheckboxMultiple")
-        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName().split('-')[1]], title=title)
+        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName()], title=title)
         if dlg.ShowModal() == wx.ID_OK:
             # Put the seletions back into the object
             items = dlg.GetSelectedItems()
-            if items != self.data[item.GetName().split('-')[1]]:
+            if items != self.data[item.GetName()]:
                 # Put data back into config structure
                 print("data before update: %s" % str(self.data))
-                self.data[item.GetName().split('-')[1]] = items
+                self.data[item.GetName()] = items
                 print("data after update: %s" % str(self.data))
                 # Set the displayed value of the item
                 item.SetValue(", ".join(items))
@@ -203,18 +204,20 @@ class EditNode(wx.Dialog):
     def OnCheckboxOneOf(self, event, choices):
         item = event.GetEventObject()
 
-        selected = self.data[item.GetName().split('-')[1]]
+        print("OnCheckboxOneOf: item is %s" % item.GetName())
+
+        selected = self.data[item.GetName()]
         if selected is None:
             selected = []
         else:
             selected = [ selected ]
 
         # Open the dialog
-        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=selected, title="Chose one of a node")
+        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=selected, title="Chose one node")
 
         if dlg.ShowModal() == wx.ID_OK:
             items = dlg.GetSelectedItems()
-            self.data[item.GetName().split('-'][1]] = items[0]
+            self.data[item.GetName()] = items[0]
             # Set the displayed value of the item
             item.SetValue(items[0])
             self.data_changed = True
@@ -223,7 +226,7 @@ class EditNode(wx.Dialog):
     def OnCheckboxBoolean(self, event, choices = [ "Yes", "No" ]):
         item = event.GetEventObject()
 
-        selected = choices[0] if self.data[item.GetName().split('-')[1]] else choices[1]
+        selected = choices[0] if self.data[item.GetName()] else choices[1]
 
         print("OnCheckboxBoolean: choices is %s selected is %s" % (choices, selected))
 
@@ -232,7 +235,7 @@ class EditNode(wx.Dialog):
 
         if dlg.ShowModal() == wx.ID_OK:
             items = dlg.GetSelectedItems()
-            self.data[item.GetName().split('-')[1]] = items[0] == choices[0]
+            self.data[item.GetName()] = items[0] == choices[0]
             # Set the displayed value of the item
             item.SetValue(items[0])
             self.data_changed = True

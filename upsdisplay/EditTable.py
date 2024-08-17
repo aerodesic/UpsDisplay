@@ -34,6 +34,8 @@ class MyListCtrl(ULC.UltimateListCtrl):
             value = ", ".join(value)
         elif type(value) is bool:
             value = "Yes" if value else "No"
+        elif value is None:
+            value = ""
         else:
             value = "%s" % value
 
