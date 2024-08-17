@@ -32,6 +32,8 @@ class MyListCtrl(ULC.UltimateListCtrl):
     def SetColumnData(self, row, column, value):
         if type(value) is list:
             value = ", ".join(value)
+        elif type(value) is bool:
+            value = "Yes" if value else "No"
         else:
             value = "%s" % value
 
