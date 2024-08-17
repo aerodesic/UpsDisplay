@@ -12,16 +12,10 @@ from wx.lib.mixins import listctrl
 import wx.lib.agw.ultimatelistctrl as ULC
 import sys
 from copy import deepcopy
-class TableListCtrl(wx.ListCtrl, listctrl.ListCtrlAutoWidthMixin):
-    def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
-        wx.ListCtrl.__init__(self, parent, ID, pos, size, style)
-        listctrl.ListCtrlAutoWidthMixin.__init__(self)
-        self.setResizeColumn(0)
-
 class MyListCtrl(ULC.UltimateListCtrl):
     def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
-        # super(MyListCtrl, self).__init__(id=ID, parent=parent, agwStyle=ULC.ULC_REPORT | ULC.ULC_HRULES)
-        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD)
+        agwStyle=wx.LC_REPORT|ULC.ULC_USER_ROW_HEIGHT|ULC.ULC_SINGLE_SEL|ULC.ULC_BORDER_SELECT|ULC.ULC_AUTO_TOGGLE_CHILD|ULC.ULC_HRULES|ULC.ULC_VRULES
+        super(MyListCtrl, self).__init__(id=ID, parent=parent, size=size, style=style, agwStyle=agwStyle)
 
     def AppendColumn(self, header):
         self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT)
@@ -40,6 +34,16 @@ class MyListCtrl(ULC.UltimateListCtrl):
             value = "%s" % value
 
         self.SetStringItem(row, column, value)
+
+    def UpdateColumnWidths(self):
+        for column in range(self.GetColumnCount()):
+            # Set column width to largest of header width and data width
+            self.SetColumnWidth(column, width=wx.LIST_AUTOSIZE)
+            datawidth = self.GetColumnWidth(column)
+            self.SetColumnWidth(column, width=wx.LIST_AUTOSIZE_USEHEADER)
+            hdrwidth = self.GetColumnWidth(column)
+            if hdrwidth < datawidth:
+                self.SetColumnWidth(column, datawidth)
 # end wxGlade
 
 
@@ -72,12 +76,21 @@ class EditTable(wx.Dialog):
         # Popluate the header
         for header in self.headers:
             self.itemList.AppendColumn(header)
+
         # Populate the rows
         for row in self.data:
             self.itemList.AppendRow([row[field] for field in self.fields])
+
         # Force autosize columns
-        for col in range(0, len(self.headers) - 1):
-            self.itemList.SetColumnWidth(col, width=wx.LIST_AUTOSIZE)
+        self.itemList.UpdateColumnWidths()
+        #for col in range(0, len(self.headers) - 1):
+        #    self.itemList.SetColumnWidth(col, width=wx.LIST_AUTOSIZE)
+        #    datawidth = self.itemList.GetColumnWidth(col)
+        #    self.itemList.SetColumnWidth(col, width=wx.LIST_AUTOSIZE_USEHEADER)
+        #    hdrwidth = self.itemList.GetColumnWidth(col)
+        #    if hdrwidth < datawidth:
+        #        self.itemList.SetColumnWidth(col, datawidth)
+
         self.itemList.SetColumnWidth(len(self.headers) - 1, width=-3) #AUTOSIZE_FILL last column
         mainSizer.Add(self.itemList, 1, wx.ALL | wx.EXPAND, 0)
 
@@ -138,6 +151,7 @@ class EditTable(wx.Dialog):
                     # self.itemList.SetColumnData(row, 
                     for column in range(len(self.fields)):
                         self.itemList.SetColumnData(row, column, results[self.fields[column]])
+                    self.itemList.UpdateColumnWidths()
                     self.data[row] = results
                     self.data_changed = True
             else:

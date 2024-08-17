@@ -47,6 +47,7 @@ class EditNode(wx.Dialog):
                 rows = rows + 1
                 self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
                 self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
+
         self.itemSizer.SetRows(rows)
         self.Fit()
         print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
@@ -114,18 +115,18 @@ class EditNode(wx.Dialog):
 
         elif schema == "<zero-or-more-node>":
             control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxZeroOrMore(event, choices=[node['name'] for node in self.config['data']]))
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more"))
 
         elif schema == "<one-or-more-node>":
             control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOrMore(event, choices=[node['name'] for node in self.config['data']]))
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more"))
 
         elif schema == "<one-of-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']]))
 
         elif schema == "<str>":
-            control = wx.TextCtrl(self, wx.ID_ANY, self.data['name'], name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data['name']), name=name)
             pass
 
         elif schema == "<bool>":
@@ -176,11 +177,11 @@ class EditNode(wx.Dialog):
             event.Skip()
 
     # Bring up a checkbox dialog that allows any or none selection
-    def OnCheckboxZeroOrMore(self, event, choices):
+    def OnCheckboxMultiple(self, event, choices, choose):
         item = event.GetEventObject()
         selected = self.data[item.GetName()]
         print("Event handler: OnCheckboxZeroOrMore")
-        dlg = TextCheckboxSelect(self, choose="zero-or-more", choices=choices, selected=self.data[item.GetName()])
+        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName()], title="Zero or more nodes")
         if dlg.ShowModal() == wx.ID_OK:
             # Put the seletions back into the object
             items = dlg.GetSelectedItems()
@@ -194,20 +195,33 @@ class EditNode(wx.Dialog):
                 self.data_changed = True
         event.Skip()
 
-    # Bring up a checkbox dialog that requies one or more selection
-    def OnCheckboxOneOrMore(self, event):
-        print("Event handler: OnCheckboxOneOrMore")
-        dlg = TextCheckboxSelect(self, choose="one-or-more", choices=choices, selected=self.data[event.GetEventObject().GetName()])
-        if dlg.ShowModal() == wx.ID_OK:
-            pass
-        pass
+#    # Bring up a checkbox dialog that requies one or more selection
+#    def OnCheckboxOneOrMore(self, event, choices):
+#        print("Event handler: OnCheckboxOneOrMore")
+#        dlg = TextCheckboxSelect(self, choose="one-or-more", choices=choices, selected=self.data[event.GetEventObject().GetName()], title="One or more nodes")
+#        if dlg.ShowModal() == wx.ID_OK:
+#            pass
+#        pass
 
     # Bring up a checkbox dialog that forces a single selection (i.e. deselects other selections automatically)
-    def OnCheckboxOneOf(self, event):
-        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=self.data[event.GetEventObject().GetName()])
+    def OnCheckboxOneOf(self, event, choices):
+        item = event.GetEventObject()
+
+        selected = self.data[item.GetName()]
+        if selected is None:
+            selected = []
+        else:
+            selected = [ selected ]
+
+        # Open the dialog
+        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=selected, title="Chose one of a node")
+
         if dlg.ShowModal() == wx.ID_OK:
-            pass
-        pass
+            items = dlg.GetSelectedItems()
+            self.data[item.GetName()] = items[0]
+            # Set the displayed value of the item
+            item.SetValue(items[0])
+            self.data_changed = True
 
     def GetResults(self):
         return self.data

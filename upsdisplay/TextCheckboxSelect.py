@@ -12,13 +12,13 @@ import wx
 
 
 class TextCheckboxSelect(wx.Dialog):
-    # choose can be 'zero-or-more', 'one-or-more' or 'any-one-of'
+    # choose can be 'zero-or-more', 'one-or-more' or 'one-of'
     def __init__(self, parent=None, choose="zero-or-more",choices=['a','b','c'], selected=[], title=None, *args, **kwds):
         kwds['parent'] = parent
         self.choose = choose
         self.choices = choices
         self.selected = selected
-        print("TextCheckboxSelect: choose_one %s" % choose)
+        print("TextCheckboxSelect: choose %s" % choose)
         print("                    choices %s" % str(choices))
         print("                    selected %s" % str(selected))
         # begin wxGlade: TextCheckboxSelect.__init__
@@ -68,8 +68,20 @@ class TextCheckboxSelect(wx.Dialog):
         return list(self.choiceList.GetCheckedStrings())
 
     def OnCheckboxItemSelected(self, event):  # wxGlade: TextCheckboxSelect.<event_handler>
-        if "any-one-of" in self.choose:
+        veto = False
+        item = event.GetEventObject()
+        if "one-of" in self.choose:
             # Deselect all other items in the checkbox
+            selected = event.GetSelection()
+            item.SetCheckedItems([selected])
+        elif "one-or-more":
+            # If no items left selected, reselect this last deselected item
+            print("Number of items selected: %s  this selectioni %d" % (item.GetSelections(), event.GetSelection()))
+            if len(item.GetChecked()) == 0:
+                item.SetCheckedItems([event.GetSelection()])
+        else:
+            # Zero or more - no more editing
             pass
+
         event.Skip()
 # end of class TextCheckboxSelect

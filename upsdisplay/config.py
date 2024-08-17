@@ -1,4 +1,5 @@
 DEFAULT_CONFIG = {
+    "version": 1,
     "global": {
         # Global configuration goes here
     },
@@ -16,6 +17,8 @@ DEFAULT_CONFIG = {
             "stop": "<str>",                        # stop is a string (action function)
             "main": "<bool>",                       # main is a boolean (show on main page if True)
             "choice": [ "<one-of>" "Red", "Blue", "Green" ],   # A test object
+            "one-or-more-node": "<one-or-more-node>",
+            "one-of-node": "<one-of-node>",
         },
         "headers": {
             "name": "Name",
@@ -27,6 +30,8 @@ DEFAULT_CONFIG = {
             "stop": "Stop Action",
             "main": "On Main Page",
             "choice": "Choice",
+            "one-or-more-node": "One or More Nodes",
+            "one-of-node": "One of Node",
         },
         "data": [{
             "name": "Nimbus",
@@ -38,6 +43,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": True,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "Cumulus",
             "dns": "cumulus.aerodesic.net",
@@ -48,6 +55,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "Nas1",
             "dns": "nas1.aerodesic.net",
@@ -58,6 +67,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "Nas2",
             "dns": "nimbus.aerodesic.net",
@@ -68,6 +79,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "Nas3",
             "dns": "nas3.aerodesic.net",
@@ -78,6 +91,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "Gatekeeper",
             "dns": "gatekeeper.aerodesic.net",
@@ -88,6 +103,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "DmzSwitch",
             "dns": "",
@@ -98,6 +115,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         },{
             "name": "NasSwitch",
             "dns": "",
@@ -108,6 +127,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "one-or-more-node": [],
+            "one-of-node": None,
         }],
     }
 }
