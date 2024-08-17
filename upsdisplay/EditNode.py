@@ -21,6 +21,8 @@ class EditNode(wx.Dialog):
         self.schema = schema   # Schema for node being edited
         self.headers = headers # Headers for node being edited
 
+        self.data_changed = False
+
         kwds["parent"] = parent
 
         # begin wxGlade: EditNode.__init__
@@ -50,11 +52,11 @@ class EditNode(wx.Dialog):
         print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
 
         # End of generated edit items
-        self.buttonOk = wx.Button(self, wx.ID_ANY, _("OK"))
+        self.buttonOk = wx.Button(self, wx.ID_OK, _("OK"))
         self.buttonOk.SetDefault()
         buttonSizer.Add(self.buttonOk, 0, 0, 0)
 
-        self.buttonCancel = wx.Button(self, wx.ID_ANY, _("Cancel"))
+        self.buttonCancel = wx.Button(self, wx.ID_CANCEL, _("Cancel"))
         buttonSizer.Add(self.buttonCancel, 0, 0, 0)
 
         self.itemSizer.AddGrowableCol(1)
@@ -182,12 +184,14 @@ class EditNode(wx.Dialog):
         if dlg.ShowModal() == wx.ID_OK:
             # Put the seletions back into the object
             items = dlg.GetSelectedItems()
-            # Put data back into config structure
-            print("data before update: %s" % str(self.data))
-            self.data[item.GetName()] = items
-            print("data after update: %s" % str(self.data))
-            # Set the displayed value of the item
-            item.SetValue(", ".join(items))
+            if items != self.data[item.GetName()]:
+                # Put data back into config structure
+                print("data before update: %s" % str(self.data))
+                self.data[item.GetName()] = items
+                print("data after update: %s" % str(self.data))
+                # Set the displayed value of the item
+                item.SetValue(", ".join(items))
+                self.data_changed = True
         event.Skip()
 
     # Bring up a checkbox dialog that requies one or more selection
@@ -207,6 +211,9 @@ class EditNode(wx.Dialog):
 
     def GetResults(self):
         return self.data
+
+    def IsDataChanged(self):
+        return self.data_changed
 
 # end of class EditNode
 

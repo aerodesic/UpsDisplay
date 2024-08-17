@@ -28,16 +28,18 @@ class MyListCtrl(ULC.UltimateListCtrl):
 
     def AppendRow(self, datalist):
         print("Append: %s" % datalist)
-        index = self.InsertStringItem(sys.maxsize, datalist[0])
+        row = self.InsertStringItem(sys.maxsize, datalist[0])
         for column in range(1, len(datalist)):
             field = datalist[column]
+            self.SetColumnData(row, column, datalist[column])
 
-            if type(field) is list:
-                field = ", ".join(field)
-            else:
-                field = "%s" % field
+    def SetColumnData(self, row, column, value):
+        if type(value) is list:
+            value = ", ".join(value)
+        else:
+            value = "%s" % value
 
-            self.SetStringItem(index, column, field)
+        self.SetStringItem(row, column, value)
 # end wxGlade
 
 
@@ -56,7 +58,7 @@ class EditTable(wx.Dialog):
         self.fields = fields
         self.headers = [config["headers"][node] for node in fields]
         self.editEntry = editEntry
-        self.datachanged = False
+        self.data_changed = False
 
         kwds['parent'] = parent
 
@@ -127,12 +129,19 @@ class EditTable(wx.Dialog):
         if self.editEntry is not None:
             # Must pass original headers 'dict' to get mappings
             dlg = self.editEntry(self, config=self.config, schema=self.schema, headers=self.config["headers"], data=itemdata)
-            if dlg.ShowModal() is wx.ID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 # Change the parent data element with the results
-                print("Results: changed %s data %s" % (dlg.IsDataChanged(), dlg.GetResults()))
+                print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
                 if dlg.IsDataChanged():
-                    self.data[row] = dlg.GetResults()
-                    self.datachanged = True
+                    results = dlg.GetResults()
+                    # Refill this row's data
+                    # self.itemList.SetColumnData(row, 
+                    for column in range(len(self.fields)):
+                        self.itemList.SetColumnData(row, column, results[self.fields[column]])
+                    self.data[row] = results
+                    self.data_changed = True
+            else:
+                print("editEntry failed")
                 
         event.Skip()
 
@@ -145,9 +154,9 @@ class EditTable(wx.Dialog):
         event.Skip()
 
     def IsDataChanged(self):
-        return self.datachanged
+        return self.data_changed
 
-    def GetData(self):
+    def GetResults(self):
         return self.data
 
 # end of class EditTable

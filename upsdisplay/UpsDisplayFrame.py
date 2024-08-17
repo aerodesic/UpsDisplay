@@ -7,6 +7,7 @@ import wx
 # begin wxGlade: dependencies
 # end wxGlade
 
+import json
 # begin wxGlade: extracode
 from EditTable import *
 from EditNode import *
@@ -101,7 +102,11 @@ class UpsDisplayFrame(wx.Frame):
 
         dlg=EditTable(self, title="Edit Nodes", config=self.config["nodes"], fields=fields, editEntry=EditNode)
         if dlg.ShowModal() == wx.ID_OK:
-            print(self.config["nodes"])
+            print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
+            if dlg.IsDataChanged():
+                print("Before: %s" % json.dumps(dlg.GetResults(), indent=4, sort_keys=True))
+                self.config['nodes']['data'] = dlg.GetResults()
+                print("After: %s" % json.dumps(dlg.GetResults(), indent=4, sort_keys=True))
         event.Skip()
 
     def OnDevicesConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
