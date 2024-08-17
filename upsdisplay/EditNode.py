@@ -33,15 +33,14 @@ class EditNode(wx.Dialog):
         mainSizer.Add(self.itemSizer, 1, wx.ALL | wx.EXPAND, 5)
 
         buttonSizer = wx.FlexGridSizer(1, 2, 0, 0)
-        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 4)
+        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
         # Generate edit items
         rows=0
         for field in self.headers:
             schema = self.schema[field]
             description = self.headers[field]
-            data = self.data[field]
-            static_text, control = self.create_edit_entry(schema, description, data)
+            static_text, control = self.create_edit_entry(schema, description, field)
             if control is not None:
                 rows = rows + 1
                 self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
@@ -92,39 +91,39 @@ class EditNode(wx.Dialog):
     # Returns a tuple:
     #    <static string with field label>, <control for editing results>
     #
-    def create_edit_entry(self, schema, description, data):
+    def create_edit_entry(self, schema, description, name):
         # print("create_edit_entry: description %s" % (description))
         # print("                   schema %s" % (schema))
-        # print("                   data %s" % (data))
+        # print("                   name %s" % name)
         # print("                   config %s" % (self.config))
         control = None
         static_text = None
 
         if schema == "<unique-node>":
             # Create a TextCtrl with an editing function to check for a unique node name
-            control = wx.TextCtrl(self, wx.ID_ANY, data)
+            control = wx.TextCtrl(self, wx.ID_ANY, self.data[name])
 
             # Create a list of current node names but remove the current node being edited from the list
             list_of_nodes = [ node['name'] for node in self.config['data']]
-            list_of_nodes.remove(data)
+            list_of_nodes.remove(self.data['name'])
 
             # print("Removed %s from node list: %s" % (data, list_of_nodes))
             control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
 
         elif schema == "<zero-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data))
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxZeroOrMore(event, choices=[node['name'] for node in self.config['data']], selected=data))
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxZeroOrMore(event, choices=[node['name'] for node in self.config['data']]))
 
         elif schema == "<one-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data))
-            control.Bind(wx.EVT_LEFT_DOWN, self.OnCheckboxOneOrMore)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOrMore(event, choices=[node['name'] for node in self.config['data']]))
 
         elif schema == "<one-of-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data))
-            control.Bind(wx.EVT_LEFT_DOWN, self.OnCheckboxOneOf)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']]))
 
         elif schema == "<str>":
-            # Create a generic TextCtrl
+            control = wx.TextCtrl(self, wx.ID_ANY, self.data['name'], name=name)
             pass
 
         elif schema == "<bool>":
@@ -175,21 +174,39 @@ class EditNode(wx.Dialog):
             event.Skip()
 
     # Bring up a checkbox dialog that allows any or none selection
-    def OnCheckboxZeroOrMore(self, event, choices, selected):
+    def OnCheckboxZeroOrMore(self, event, choices):
+        item = event.GetEventObject()
+        selected = self.data[item.GetName()]
         print("Event handler: OnCheckboxZeroOrMore")
-        dlg = TextCheckboxSelect(self, choose="zero-or-more", choices=choices, selected=selected)
+        dlg = TextCheckboxSelect(self, choose="zero-or-more", choices=choices, selected=self.data[item.GetName()])
         if dlg.ShowModal() == wx.ID_OK:
-            pass
+            # Put the seletions back into the object
+            items = dlg.GetSelectedItems()
+            # Put data back into config structure
+            print("data before update: %s" % str(self.data))
+            self.data[item.GetName()] = items
+            print("data after update: %s" % str(self.data))
+            # Set the displayed value of the item
+            item.SetValue(", ".join(items))
         event.Skip()
 
     # Bring up a checkbox dialog that requies one or more selection
     def OnCheckboxOneOrMore(self, event):
         print("Event handler: OnCheckboxOneOrMore")
+        dlg = TextCheckboxSelect(self, choose="one-or-more", choices=choices, selected=self.data[event.GetEventObject().GetName()])
+        if dlg.ShowModal() == wx.ID_OK:
+            pass
         pass
 
     # Bring up a checkbox dialog that forces a single selection (i.e. deselects other selections automatically)
     def OnCheckboxOneOf(self, event):
-        print("Event handler: OnCheckboxOneOf")
+        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=self.data[event.GetEventObject().GetName()])
+        if dlg.ShowModal() == wx.ID_OK:
+            pass
         pass
+
+    def GetResults(self):
+        return self.data
+
 # end of class EditNode
 

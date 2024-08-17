@@ -34,25 +34,23 @@ class TextCheckboxSelect(wx.Dialog):
         self.choiceList.SetCheckedStrings(self.selected)
         mainSizer.Add(self.choiceList, 1, wx.ALL | wx.EXPAND, 1)
 
-        buttonSizer = wx.StdDialogButtonSizer()
-        mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
+        buttonSizer = wx.FlexGridSizer(1, 2, 0, 0)
+        mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        self.button_OK = wx.Button(self, wx.ID_OK, "")
-        self.button_OK.SetDefault()
-        buttonSizer.AddButton(self.button_OK)
+        self.buttonOK = wx.Button(self, wx.ID_OK, "")
+        self.buttonOK.SetDefault()
+        buttonSizer.Add(self.buttonOK, 0, 0, 0)
 
-        self.button_CANCEL = wx.Button(self, wx.ID_CANCEL, "")
-        buttonSizer.AddButton(self.button_CANCEL)
-
-        buttonSizer.Realize()
+        self.buttonCANCEL = wx.Button(self, wx.ID_CANCEL, "")
+        buttonSizer.Add(self.buttonCANCEL, 0, 0, 0)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
         mainSizer.Fit(self)
 
-        self.SetAffirmativeId(self.button_OK.GetId())
-        self.SetEscapeId(self.button_CANCEL.GetId())
+        self.SetAffirmativeId(self.buttonOK.GetId())
+        self.SetEscapeId(self.buttonCANCEL.GetId())
 
         self.Layout()
         if title is not None:
@@ -66,12 +64,12 @@ class TextCheckboxSelect(wx.Dialog):
 
     # Return the current selected items in the checkbox list
     def GetSelectedItems(self):
+        print("TextCheckboxSelect: GetSelectedItems returning %s" % str(list(self.choiceList.GetCheckedStrings())))
         return list(self.choiceList.GetCheckedStrings())
 
     def OnCheckboxItemSelected(self, event):  # wxGlade: TextCheckboxSelect.<event_handler>
         if "any-one-of" in self.choose:
             # Deselect all other items in the checkbox
             pass
-        print("Event handler 'OnCheckboxItemSelected' not implemented!")
         event.Skip()
 # end of class TextCheckboxSelect

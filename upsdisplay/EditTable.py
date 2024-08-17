@@ -129,8 +129,9 @@ class EditTable(wx.Dialog):
             dlg = self.editEntry(self, config=self.config, schema=self.schema, headers=self.config["headers"], data=itemdata)
             if dlg.ShowModal() is wx.ID_OK:
                 # Change the parent data element with the results
+                print("Results: changed %s data %s" % (dlg.IsDataChanged(), dlg.GetResults()))
                 if dlg.IsDataChanged():
-                    self.data[row] = dlg.GetData()
+                    self.data[row] = dlg.GetResults()
                     self.datachanged = True
                 
         event.Skip()
