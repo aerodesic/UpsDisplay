@@ -16,7 +16,9 @@ DEFAULT_CONFIG = {
             "start": "<str>",                       # start is a string (action function)
             "stop": "<str>",                        # stop is a string (action function)
             "main": "<bool>",                       # main is a boolean (show on main page if True)
-            "choice": [ "<one-of>" "Red", "Blue", "Green" ],   # A test object
+            "choice": [ "<one-of>", "Red", "Blue", "Green" ],   # A test object
+            'choice1': [ "<zero-or-more>", "Zip", "Zap", "Zorch" ],
+            "choice2": [ "<one-or-more>", "This", "Is", "A", "Test" ],
             "one-or-more-node": "<one-or-more-node>",
             "one-of-node": "<one-of-node>",
         },
@@ -30,6 +32,8 @@ DEFAULT_CONFIG = {
             "stop": "Stop Action",
             "main": "On Main Page",
             "choice": "Choice",
+            "choice1": "Choice1",
+            "choice2": "Choice2",
             "one-or-more-node": "One or More Nodes",
             "one-of-node": "One of Node",
         },
@@ -41,6 +45,8 @@ DEFAULT_CONFIG = {
             "wants",
             "main",
             "choice",
+            "choice1",
+            "choice2",
             "one-or-more-node",
             "one-of-node"
         ],
@@ -55,6 +61,8 @@ DEFAULT_CONFIG = {
             'stop',
             'main',
             'choice',
+            "choice1",
+            "choice2",
             'one-or-more-node',
             'one-of-node'
         ],
@@ -69,6 +77,8 @@ DEFAULT_CONFIG = {
             "stop": "",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },
@@ -82,6 +92,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": True,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -94,6 +106,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -106,6 +120,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -118,6 +134,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -130,6 +148,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -142,6 +162,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -154,6 +176,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         },{
@@ -166,6 +190,8 @@ DEFAULT_CONFIG = {
             "stop": "apcstop",
             "main": False,
             "choice": None,
+            "choice1": None,
+            "choice2": None,
             "one-or-more-node": [],
             "one-of-node": None,
         }],

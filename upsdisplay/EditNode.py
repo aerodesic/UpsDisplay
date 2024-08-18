@@ -105,10 +105,13 @@ class EditNode(wx.Dialog):
         control = None
         static_text = None
 
+        data = self.data[name]
+
         print("create_edit_entry: schema '%s' description '%s' name '%s' data '%s'" % (schema, description, name, self.data[name]))
         if schema == "<unique-node>":
             # Create a TextCtrl with an editing function to check for a unique node name
             control = wx.TextCtrl(self, wx.ID_ANY, self.data[name])
+            data = self.data[name]
 
             # Create a list of current node names but remove the current node being edited from the list
             list_of_nodes = [ node['name'] for node in self.config['data']]
@@ -118,39 +121,38 @@ class EditNode(wx.Dialog):
             control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
 
         elif schema == "<zero-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more", title="Zero or more nodes"))
 
         elif schema == "<one-or-more-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(self.data[name]), name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more", title="One or more nodes"))
 
         elif schema == "<one-of-node>":
-            data = self.data[name]
             control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']]))
+            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']], title="Chose one node"))
 
         elif schema == "<str>":
             control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
 
         elif schema == "<bool>":
             # Create a one-of for Yes/No and replace value with boolean
-            control = wx.TextCtrl(self, wx.ID_ANY, "Yes" if self.data[name] else "No", name=name)
+            control = wx.TextCtrl(self, wx.ID_ANY, "Yes" if data else "No", name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxBoolean(event, choices=["Yes", "No"]))
 
         elif type(schema) == list and len(schema) > 1:
             # A list of items
-            if schema[0] == "<one-of":
-                # A choice of a single item of the following items
-                pass
+            if schema[0] == "<one-of>":
+                 control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name)
+                 control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=schema[1:], title="Choose one"))
 
             elif schema[0] == "<zero-or-more>":
-                # Zero or more of the remaining items
-                pass
+                control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name)
+                control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=schema[1:], choose="zero-or-more", title="Choose any of these"))
 
             elif schema[0] == "<one-or-more>":
-                # One or more of the following items
-                pass
+                control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name)
+                control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=schema[1:], choose="one-or-more", title="One or more"))
 
         if control is None:
             # dlg = ShowMessage("Weird error")
@@ -185,6 +187,8 @@ class EditNode(wx.Dialog):
     def OnCheckboxMultiple(self, event, choices, choose, title):
         item = event.GetEventObject()
         selected = self.data[item.GetName()]
+        if selected is None:
+            selected = []
         print("Event handler: OnCheckboxMultiple")
         dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName()], title=title)
         if dlg.ShowModal() == wx.ID_OK:
@@ -201,7 +205,7 @@ class EditNode(wx.Dialog):
         event.Skip()
 
     # Bring up a checkbox dialog that forces a single selection (i.e. deselects other selections automatically)
-    def OnCheckboxOneOf(self, event, choices):
+    def OnCheckboxOneOf(self, event, choices, title="Choose one node"):
         item = event.GetEventObject()
 
         print("OnCheckboxOneOf: item is %s" % item.GetName())
@@ -213,7 +217,7 @@ class EditNode(wx.Dialog):
             selected = [ selected ]
 
         # Open the dialog
-        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=selected, title="Chose one node")
+        dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=selected, title=title)
 
         if dlg.ShowModal() == wx.ID_OK:
             items = dlg.GetSelectedItems()
