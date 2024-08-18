@@ -175,7 +175,7 @@ class EditNode(wx.Dialog):
         event.Skip()
 
     def OnCheckUniqueNodeName(self, event, invalid_names):
-        # print("OnCheckUniqueNodeName fired: %s" % invalid_names)
+        print("OnCheckUniqueNodeName fired: %s" % invalid_names)
         newname = event.GetEventObject().GetValue()
         if newname in invalid_names:
             msg = ShowMessage("%s is not a valid Node name" % newname)
@@ -190,7 +190,7 @@ class EditNode(wx.Dialog):
         if selected is None:
             selected = []
         print("Event handler: OnCheckboxMultiple")
-        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=self.data[item.GetName()], title=title)
+        dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=selected, title=title)
         if dlg.ShowModal() == wx.ID_OK:
             # Put the seletions back into the object
             items = dlg.GetSelectedItems()
