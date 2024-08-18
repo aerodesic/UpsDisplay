@@ -93,7 +93,7 @@ class EditTable(wx.Dialog):
         self.itemList.UpdateColumnWidths()
         mainSizer.Add(self.itemList, 1, wx.ALL | wx.EXPAND, 0)
 
-        buttonSizer = wx.FlexGridSizer(1, 4, 0, 0)
+        buttonSizer = wx.FlexGridSizer(1, 3, 0, 0)
         mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
         self.buttonOk = wx.Button(self, wx.ID_OK, "")
@@ -104,9 +104,6 @@ class EditTable(wx.Dialog):
 
         self.buttonNew = wx.Button(self, wx.ID_ADD, "")
         buttonSizer.Add(self.buttonNew, 0, 0, 0)
-
-        self.buttonDelete = wx.Button(self, wx.ID_DELETE, "")
-        buttonSizer.Add(self.buttonDelete, 0, 0, 0)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
@@ -124,7 +121,6 @@ class EditTable(wx.Dialog):
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.itemList)
         self.Bind(wx.EVT_BUTTON, self.OnAddButton, self.buttonNew)
-        self.Bind(wx.EVT_BUTTON, self.OnDeleteButton, self.buttonDelete)
         # end wxGlade
 
     # On selected item, open editEntry dialog
@@ -136,18 +132,26 @@ class EditTable(wx.Dialog):
         if self.editEntry is not None:
             # Must pass original headers 'dict' to get mappings
             dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.config["headers"], data=itemdata)
-            if dlg.ShowModal() == wx.ID_OK:
+            results = dlg.ShowModal()
+            if results == wx.ID_OK:
                 # Change the parent data element with the results
                 print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
                 if dlg.IsDataChanged():
                     results = dlg.GetResults()
-                    # Refill this row's data
-                    # self.itemList.SetColumnData(row, 
-                    for column in range(len(self.table_fields)):
-                        self.itemList.SetColumnData(row, column, results[self.table_fields[column]])
-                    self.itemList.UpdateColumnWidths()
-                    self.data[row] = results
-                    self.data_changed = True
+                    if len(results['name']) != 0:
+                        # Refill this row's data
+                        # self.itemList.SetColumnData(row, 
+                        for column in range(len(self.table_fields)):
+                            self.itemList.SetColumnData(row, column, results[self.table_fields[column]])
+                        self.itemList.UpdateColumnWidths()
+                        self.data[row] = results
+                        self.data_changed = True
+            elif results == wx.ID_DELETE:
+                # Delete this entry
+                print("Delete request on row %d" % row)
+                del(self.data[row])
+                self.RedrawItemList()
+                self.data_changed = True
             else:
                 print("editEntry failed")
                 
@@ -161,40 +165,33 @@ class EditTable(wx.Dialog):
             itemdata['name'] = ""
             # Temporarily place into config table
             row = len(self.config['data'])
-            self.config['data'].append(itemdata)
+            # self.config['data'].append(itemdata)
             dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.config["headers"], data=itemdata)
             if dlg.ShowModal() == wx.ID_OK:
                 # Change the parent data element with the results
                 print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
                 if dlg.IsDataChanged():
-                    results = dlg.GetResults()
-                    if len(results['name']) == 0:
-                        print("Name length is empty")
-                        dlg = ShowMessage("Name field is empty")
-                        dlg.ShowModal()
-
-                    elif results['name'] in [ field['name'] for field in self.config['data']]:
-                        print("Name already in use")
-                        dlg = ShowMessage("Name already in use")
-                        dlg.ShowModal()
-
-                    else:
-                        # Refill this row's data
-                        # self.itemList.SetColumnData(row, 
-                        for column in range(len(self.table_fields)):
-                            self.itemList.SetColumnData(row, column, results[self.table_fields[column]])
-                        self.itemList.UpdateColumnWidths()
-                        self.data[row] = results
-                        self.data_changed = True
+                    self.data.append(dlg.GetResults())
+                    self.RedrawItemList()
+                    self.data_changed = True
             else:
                 # Delete the data row
                 del(self.config['data'][row])
                 print("editEntry failed")
         event.Skip()
+    
+    def RedrawItemList(self):
+        self.itemList.ClearAll()
 
-    def OnDeleteButton(self, event):  # wxGlade: EditTable.<event_handler>
-        print("Event handler 'OnDeleteButton' not implemented!")
-        event.Skip()
+        # Popluate the header
+        for header in self.headers:
+            self.itemList.AppendColumn(header)
+
+        # Populate the rows
+        for row in self.data:
+            self.itemList.AppendRow([row[field] for field in self.table_fields])
+
+        self.itemList.UpdateColumnWidths()
 
     def IsDataChanged(self):
         return self.data_changed

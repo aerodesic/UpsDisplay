@@ -12,7 +12,7 @@ import wx
 
 
 class ShowMessage(wx.Dialog):
-    def __init__(self, message="", heading=None, parent=None, *args, **kwds):
+    def __init__(self, message="", heading=None, parent=None, buttons={"OK": wx.ID_OK}, *args, **kwds):
         kwds['parent'] = parent
 
         # begin wxGlade: ShowMessage.__init__
@@ -30,20 +30,17 @@ class ShowMessage(wx.Dialog):
             self.SetTitle(heading)
         mainSizer.Add(self.message_body, 0, wx.ALL | wx.EXPAND, 0)
 
-        buttonSizer = wx.FlexGridSizer(1, 1, 0, 0)
-        mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 4)
-
-        self.buttonOK = wx.Button(self, wx.ID_OK, "")
-        self.buttonOK.SetDefault()
-        buttonSizer.Add(self.buttonOK, 0, 0, 0)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER | wx.ALL, 0)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
 
-        self.SetAffirmativeId(self.buttonOK.GetId())
-
         self.Layout()
+        for button_text in buttons:
+            button = wx.Button(self, buttons[button_text], button_text)
+            buttonSizer.Add(button, 0, 0, 0)
         # end wxGlade
 
 # end of class ShowMessage

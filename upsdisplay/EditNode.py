@@ -35,7 +35,7 @@ class EditNode(wx.Dialog):
         self.itemSizer = wx.FlexGridSizer(0, 2, 5, 5)
         mainSizer.Add(self.itemSizer, 1, wx.ALL | wx.EXPAND, 5)
 
-        buttonSizer = wx.FlexGridSizer(1, 2, 0, 0)
+        buttonSizer = wx.FlexGridSizer(1, 3, 0, 0)
         mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
         # Generate edit items
@@ -63,15 +63,15 @@ class EditNode(wx.Dialog):
         self.buttonCancel = wx.Button(self, wx.ID_CANCEL, _("Cancel"))
         buttonSizer.Add(self.buttonCancel, 0, 0, 0)
 
+        self.deleteButton = wx.Button(self, wx.ID_DELETE, _("Delete"))
+        buttonSizer.Add(self.deleteButton, 0, 0, 0)
+
         self.itemSizer.AddGrowableCol(1)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
         mainSizer.Fit(self)
-
-        self.SetAffirmativeId(self.buttonOk.GetId())
-        self.SetEscapeId(self.buttonCancel.GetId())
 
         self.Layout()
         #self.Maximize()
@@ -80,6 +80,8 @@ class EditNode(wx.Dialog):
         self.SetTitle(self.data['name'])
 
         self.Bind(wx.EVT_BUTTON, self.OnOkButton, self.buttonOk)
+        self.Bind(wx.EVT_BUTTON, self.OnCancelButton, self.buttonCancel)
+        self.Bind(wx.EVT_BUTTON, self.OnDeleteButton, self.deleteButton)
         # end wxGlade
 
     # Create and return the static text and edit field as a tuple
@@ -110,12 +112,13 @@ class EditNode(wx.Dialog):
         print("create_edit_entry: schema '%s' description '%s' name '%s' data '%s'" % (schema, description, name, self.data[name]))
         if schema == "<unique-node>":
             # Create a TextCtrl with an editing function to check for a unique node name
-            control = wx.TextCtrl(self, wx.ID_ANY, self.data[name])
+            control = wx.TextCtrl(self, wx.ID_ANY, self.data[name], name=name)
             data = self.data[name]
 
             # Create a list of current node names but remove the current node being edited from the list
             list_of_nodes = [ node['name'] for node in self.config['data']]
-            list_of_nodes.remove(self.data['name'])
+            if self.data['name'] in list_of_nodes:
+                list_of_nodes.remove(self.data['name'])
 
             # print("Removed %s from node list: %s" % (data, list_of_nodes))
             control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
@@ -134,6 +137,8 @@ class EditNode(wx.Dialog):
 
         elif schema == "<str>":
             control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
+            control.Bind(wx.EVT_SET_FOCUS, self.OnCheckFocusChange)
+            control.Bind(wx.EVT_KILL_FOCUS, self.OnCheckFocusChange)
 
         elif schema == "<bool>":
             # Create a one-of for Yes/No and replace value with boolean
@@ -165,22 +170,23 @@ class EditNode(wx.Dialog):
         return static_text, control
 
 
-    # Process OK and put the data back into the configuration table entry identified by 'name'
-    def OnOkButton(self, event):  # wxGlade: EditNode.<event_handler>
-        print("Event handler 'OnOkButton' not implemented!")
-        event.Skip()
-
     def OnTextEnter(self, event):  # wxGlade: EditNode.<event_handler>
         print("Event handler 'OnTextEnter' not implemented!")
         event.Skip()
 
     def OnCheckUniqueNodeName(self, event, invalid_names):
-        print("OnCheckUniqueNodeName fired: %s" % invalid_names)
-        newname = event.GetEventObject().GetValue()
+        item = event.GetEventObject()
+        # print("OnCheckUniqueNodeName fired: %s" % invalid_names)
+        newname = item.GetValue()
         if newname in invalid_names:
-            msg = ShowMessage("%s is not a valid Node name" % newname)
+            msg = ShowMessage("%s is already used." % newname)
             msg.ShowModal()
+            item.SetFocus()
+            item.SetValue("")
         else:
+            # Capture this info to the data table
+            self.data[item.GetName()] = item.GetValue()
+            self.data_changed = True
             event.Skip()
 
     # Bring up a checkbox dialog that allows any or none selection
@@ -244,11 +250,30 @@ class EditNode(wx.Dialog):
             item.SetValue(items[0])
             self.data_changed = True
 
+    # Process OK and put the data back into the configuration table entry identified by 'name'
+    def OnOkButton(self, event):  # wxGlade: EditNode.<event_handler>
+        self.EndModal(wx.ID_OK)
+        event.Skip()
+
+    def OnCancelButton(self, event):  # wxGlade: EditNode.<event_handler>
+        self.itemSizer.Clear(True)
+        self.EndModal(wx.ID_CANCEL)
+        event.Skip()
+
     def GetResults(self):
         return self.data
 
     def IsDataChanged(self):
         return self.data_changed
+
+    def OnDeleteButton(self, event):  # wxGlade: EditNode.<event_handler>
+        dlg = ShowMessage("Delete this entry?", "Are you sure?", buttons={"Yes": wx.ID_OK, "No": wx.ID_CANCEL})
+        if dlg.ShowModal() == wx.ID_OK:
+            self.EndModal(wx.ID_DELETE)
+        event.Skip()
+
+    def OnCheckFocusChange(self, event):
+        event.Skip()
 
 # end of class EditNode
 
