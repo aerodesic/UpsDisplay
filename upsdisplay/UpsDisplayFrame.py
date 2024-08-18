@@ -34,6 +34,38 @@ CONFIGFILE = ".upsdisplay"
 
 from config import DEFAULT_CONFIG
 
+class NodeItem(wx.Control):
+    def __init__(self, parent=None, nodeinfo=None, *args, **kwds):
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
+        kwds["parent"] = parent
+
+        print("NodeItem: %s" % (str(nodeinfo)))
+
+        wx.Control.__init__(self, *args, **kwds)
+
+        self.nodename = nodeinfo['name']
+        mainSizer = wx.FlexGridSizer(3, 1, 0, 0)
+
+        # Title at the top
+        self.title = wx.StaticText(self, label=self.nodename)
+        mainSizer.Add(self.title, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
+
+        # Add an icon in the middle
+
+        # Info message at bottom
+        self.info = wx.StaticText(self, label="<Status>")
+        mainSizer.Add(self.info, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
+
+        self.SetBackgroundColour(wx.BLUE)
+        self.SetForegroundColour(wx.WHITE)
+
+        self.SetSizer(mainSizer)
+        mainSizer.Fit(self)
+        self.Layout()
+
+    def SetInfo(self, info):
+        self.info.SetLabel(info)
+
 class UpsDisplayFrame(wx.Frame):
     def __init__(self, *args, **kwds):
 
@@ -44,44 +76,49 @@ class UpsDisplayFrame(wx.Frame):
 
         self.mainPanel = wx.Panel(self, wx.ID_ANY)
 
-        self.mainSizer = wx.FlexGridSizer(3, 1, 0, 3)
-
-        topSizer = wx.FlexGridSizer(1, 0, 0, 0)
-        self.mainSizer.Add(topSizer, 1, wx.ALL | wx.EXPAND, 5)
-
-        self.statusSizer = wx.FlexGridSizer(0, 2, 10, 0)
-        self.mainSizer.Add(self.statusSizer, 1, wx.ALL | wx.EXPAND, 5)
+        self.mainSizer = wx.FlexGridSizer(3, 1, 5, 5)
 
         buttonSizer = wx.FlexGridSizer(1, 3, 5, 10)
-        self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_CENTER, 0)
+        self.mainSizer.Add(buttonSizer, 1, wx.ALL | wx.EXPAND, 0)
+
+        self.displayAllNodes = wx.CheckBox(self.mainPanel, wx.ID_ANY, _("Show All"), style=wx.CHK_2STATE)
+        self.displayAllNodes.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
+        buttonSizer.Add(self.displayAllNodes, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
 
         self.nodeConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Nodes"))
         self.nodeConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.nodeConfigButton, 0, 0, 0)
+        buttonSizer.Add(self.nodeConfigButton, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
 
         self.deviceConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Devices"))
         self.deviceConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.deviceConfigButton, 0, 0, 0)
+        buttonSizer.Add(self.deviceConfigButton, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
+
+        self.statusSizer = wx.FlexGridSizer(1, 1, 10, 0)
+        self.mainSizer.Add(self.statusSizer, 1, wx.ALL | wx.EXPAND, 5)
+
+        self.text_ctrl_1 = wx.TextCtrl(self.mainPanel, wx.ID_ANY, "", style=wx.TE_READONLY)
+        self.statusSizer.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
+
+        self.infoSizer = wx.FlexGridSizer(3, 3, 5, 5)
+        self.mainSizer.Add(self.infoSizer, 1, wx.ALL | wx.EXPAND, 5)
+
+        self.statusSizer.AddGrowableCol(0)
 
         buttonSizer.AddGrowableCol(0)
 
-        self.statusSizer.AddGrowableCol(1)
-
-        topSizer.AddGrowableCol(0)
-
-        self.mainSizer.AddGrowableRow(1)
         self.mainSizer.AddGrowableCol(0)
         self.mainPanel.SetSizer(self.mainSizer)
 
         self.mainSizer.Fit(self)
         self.Layout()
 
+        self.Bind(wx.EVT_CHECKBOX, self.OnShowAllClicked, self.displayAllNodes)
         self.Bind(wx.EVT_BUTTON, self.OnNodeConfigButton, self.nodeConfigButton)
         self.Bind(wx.EVT_BUTTON, self.OnDevicesConfigButton, self.deviceConfigButton)
         self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         # end wxGlade
 
-        # self.ReloadObjects()
+        self.LoadObjects()
 
         self.statusSizer.Layout()
         self.mainSizer.Layout()
@@ -114,16 +151,42 @@ class UpsDisplayFrame(wx.Frame):
         try:
             with open(CONFIGFILE, "r") as f:
                 config = json.load(f)
+
         except:
             config = DEFAULT_CONFIG
         return config
+
+    # 
+    # Load the objects from the config information and propagate the Node display
+    #
+    def LoadObjects(self, config=None):
+        if config is None:
+            config = self.GetConfig()
+        
+        # Remove all info panels
+        self.infoSizer.Clear(True)
+        for node in config['nodes']['data']:
+            if self.displayAllNodes.IsChecked() or node['main']:
+                # Build Node object and add to display
+                nodepanel = NodeItem(self, node)
+                self.infoSizer.Add(nodepanel)
+                self.infoSizer.Fit(self)
+
+        self.infoSizer.Layout()
+        self.Fit()
 
     def PutConfig(self, config):
         try:
             with open(CONFIGFILE, "w") as f:
                 f.write(json.dumps(config, indent=4, sort_keys=True))
+
         except Exception as e:
             print("PutConfig: %s" % str(e))
+
+        self.LoadObjects(config)
         
+    def OnShowAllClicked(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
+        self.LoadObjects()
+        event.Skip()
 # end of class UpsDisplayFrame
 
