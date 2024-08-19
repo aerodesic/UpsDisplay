@@ -7,20 +7,25 @@ DEFAULT_CONFIG = {
         # List of available devices seen by scanner
     ],
     "nodes": {
+        # Options are:
+        #   '<unique-node>'                           # Select a node name that is not already in the nodes.data table
+        #   '<zero-or-more-nodes>'                    # A list of zero or more node names
+        #   '<one-or-more-nodes>'                     # A list of one or more node names
+        #   '<one-of-node>'                           # A single node name
+        #   [ '<zero-or-more>' 'item' 'item' ... ]    # Zero of more from a list of string items
+        #   [ '<one-or-more>' 'item' 'item' ... ]     # One of more from a list of string items
+        #   [ '<one-of>' 'item' 'item' ... ]          # One from a list of string items
+        #   '<str>'                                   # A generic string
+        #   '<bool>'                                  # A boolean item (value cell is True or False and display value is Yes or No)
         "schema": {
-            "name": "<unique-node>",                # name is a unique node name
-            "dns": "<str>",                         # dns is a string (but should be smarter)
-            "uri": "<str>",                         # uri is a string (but should be smarter)
-            "requires": "<zero-or-more-node>",      # requires is a list of <node names>
-            "wants": "<zero-or-more-node>",         # wants is a list of <node names>
-            "start": "<str>",                       # start is a string (action function)
-            "stop": "<str>",                        # stop is a string (action function)
-            "main": "<bool>",                       # main is a boolean (show on main page if True)
-#            "choice": [ "<one-of>", "Red", "Blue", "Green" ],   # A test object
-#            'choice1': [ "<zero-or-more>", "Zip", "Zap", "Zorch" ],
-#            "choice2": [ "<one-or-more>", "This", "Is", "A", "Test" ],
-#            "one-or-more-node": "<one-or-more-node>",
-#            "one-of-node": "<one-of-node>",
+            "name": "<unique-node>",                  # name is a unique node name
+            "dns": "<str>",                           # dns is a string (but should be smarter)
+            "uri": "<str>",                           # uri is a string (but should be smarter)
+            "requires": "<zero-or-more-nodes>",       # requires is a list of <node names>
+            "wants": "<zero-or-more-nodes>",          # wants is a list of <node names>
+            "start": "<str>",                         # start is a string (action function)
+            "stop": "<str>",                          # stop is a string (action function)
+            "showmain": "<bool>",                     # main is a boolean (show on main page if True)
         },
         "headers": {
             "name": "Name",
@@ -30,12 +35,7 @@ DEFAULT_CONFIG = {
             "wants": "Wants",
             "start": "Start Action",
             "stop": "Stop Action",
-            "main": "On Main Page",
-#            "choice": "Choice",
-#            "choice1": "Choice1",
-#            "choice2": "Choice2",
-#            "one-or-more-node": "One or More Nodes",
-#            "one-of-node": "One of Node",
+            "showmain": "On Main Page",
         },
         # Include these in the table shown for configuration, in order of display
         'table_fields': [
@@ -43,12 +43,7 @@ DEFAULT_CONFIG = {
             "uri",
             "requires",
             "wants",
-            "main",
-#            "choice",
-#            "choice1",
-#            "choice2",
-#            "one-or-more-node",
-#            "one-of-node"
+            "showmain",
         ],
         # Include these in the detailed edit dialog, in order of display
         'edit_fields': [
@@ -59,12 +54,7 @@ DEFAULT_CONFIG = {
             'wants',
             'start',
             'stop',
-            'main',
-#            'choice',
-#            "choice1",
-#            "choice2",
-#            'one-or-more-node',
-#            'one-of-node'
+            'showmain',
         ],
         # A default setting when creating a new entry
         'default': {
@@ -75,12 +65,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "",
             "stop": "",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         },
         "data": [{
             "name": "Nimbus",
@@ -90,12 +75,7 @@ DEFAULT_CONFIG = {
             "wants": ["Nas1", "Nas2"],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": True,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": True,
         },{
             "name": "Cirrus",
             "dns": "cirrus.aerodesic.net",
@@ -104,12 +84,7 @@ DEFAULT_CONFIG = {
             "wants": ["Nas1", "Nas2"],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": True,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": True,
         },{
             "name": "Cumulus",
             "dns": "cumulus.aerodesic.net",
@@ -118,12 +93,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": True,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": True,
         },{
             "name": "Nas1",
             "dns": "nas1.aerodesic.net",
@@ -132,12 +102,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         },{
             "name": "Nas2",
             "dns": "nimbus.aerodesic.net",
@@ -146,12 +111,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         },{
             "name": "Nas3",
             "dns": "nas3.aerodesic.net",
@@ -160,12 +120,7 @@ DEFAULT_CONFIG = {
             "wants": ["Gatekeeper"],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         },{
             "name": "Gatekeeper",
             "dns": "gatekeeper.aerodesic.net",
@@ -174,12 +129,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         },{
             "name": "DmzSwitch",
             "dns": "",
@@ -188,12 +138,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         },{
             "name": "NasSwitch",
             "dns": "",
@@ -202,12 +147,7 @@ DEFAULT_CONFIG = {
             "wants": [],
             "start": "apcstart",
             "stop": "apcstop",
-            "main": False,
-#            "choice": None,
-#            "choice1": None,
-#            "choice2": None,
-#            "one-or-more-node": [],
-#            "one-of-node": None,
+            "showmain": False,
         }],
     }
 }

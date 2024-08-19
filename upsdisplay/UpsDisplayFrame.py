@@ -34,34 +34,34 @@ CONFIGFILE = ".upsdisplay"
 
 from config import DEFAULT_CONFIG
 
-class NodeItem(wx.Control):
-    def __init__(self, parent=None, nodeinfo=None, *args, **kwds):
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
-        kwds["parent"] = parent
-
+class NodeItem(wx.Button):
+    def __init__(self, parent, id=wx.ID_ANY, label="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
         print("NodeItem: %s" % (str(nodeinfo)))
 
-        wx.Control.__init__(self, *args, **kwds)
+        self.nodeinfo = nodeinfo
 
-        self.nodename = nodeinfo['name']
-        mainSizer = wx.FlexGridSizer(3, 1, 0, 0)
+        super(NodeItem, self).__init__(parent, id, label, pos, size, style, validator, name)
+        self.SetLabel("%s\n%s" % (nodeinfo['name'], "<Status>"))
+
+        # mainSizer = wx.FlexGridSizer(3, 1, 0, 0)
+
+        font=wx.Font(8, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
+        self.SetFont(font)
 
         # Title at the top
-        self.title = wx.StaticText(self, label=self.nodename)
-        mainSizer.Add(self.title, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
+        # self.title = wx.StaticText(self, label=self.nodename)
+        # self.SetFont(font)
+        # mainSizer.Add(self.title, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
 
         # Add an icon in the middle
 
         # Info message at bottom
-        self.info = wx.StaticText(self, label="<Status>")
-        mainSizer.Add(self.info, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
+        # self.info = wx.StaticText(self, label="<Status")
+        # self.info.SetFont(font)
+        # mainSizer.Add(self.info, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
 
         self.SetBackgroundColour(wx.BLUE)
         self.SetForegroundColour(wx.WHITE)
-
-        self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
-        self.Layout()
 
     def SetInfo(self, info):
         self.info.SetLabel(info)
@@ -79,33 +79,30 @@ class UpsDisplayFrame(wx.Frame):
         self.mainSizer = wx.FlexGridSizer(3, 1, 5, 5)
 
         buttonSizer = wx.FlexGridSizer(1, 3, 5, 10)
-        self.mainSizer.Add(buttonSizer, 1, wx.ALL | wx.EXPAND, 0)
+        self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_RIGHT, 0)
 
-        self.displayAllNodes = wx.CheckBox(self.mainPanel, wx.ID_ANY, _("Show All"), style=wx.CHK_2STATE)
+        self.displayAllNodes = wx.CheckBox(self.mainPanel, wx.ID_ANY, _("Show All"))
         self.displayAllNodes.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.displayAllNodes, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
+        buttonSizer.Add(self.displayAllNodes, 1, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 3)
 
         self.nodeConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Nodes"))
         self.nodeConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.nodeConfigButton, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
+        buttonSizer.Add(self.nodeConfigButton, 1, wx.ALIGN_CENTER_VERTICAL, 0)
 
         self.deviceConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Devices"))
         self.deviceConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.deviceConfigButton, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
-
-        self.statusSizer = wx.FlexGridSizer(1, 1, 10, 0)
-        self.mainSizer.Add(self.statusSizer, 1, wx.ALL | wx.EXPAND, 5)
+        buttonSizer.Add(self.deviceConfigButton, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
 
         self.text_ctrl_1 = wx.TextCtrl(self.mainPanel, wx.ID_ANY, "", style=wx.TE_READONLY)
-        self.statusSizer.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
+        self.mainSizer.Add(self.text_ctrl_1, 1, wx.EXPAND, 0)
 
-        self.infoSizer = wx.FlexGridSizer(3, 3, 5, 5)
+        self.infoSizer = wx.WrapSizer(wx.HORIZONTAL)
         self.mainSizer.Add(self.infoSizer, 1, wx.ALL | wx.EXPAND, 5)
 
-        self.statusSizer.AddGrowableCol(0)
-
+        buttonSizer.AddGrowableRow(0)
         buttonSizer.AddGrowableCol(0)
 
+        self.mainSizer.AddGrowableRow(2)
         self.mainSizer.AddGrowableCol(0)
         self.mainPanel.SetSizer(self.mainSizer)
 
@@ -118,11 +115,7 @@ class UpsDisplayFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         # end wxGlade
 
-        self.LoadObjects()
-
-        self.statusSizer.Layout()
-        self.mainSizer.Layout()
-        self.Fit()
+        wx.CallLater(500, self.LoadObjects)
 
     def CloseUps(self):
         pass
@@ -166,14 +159,17 @@ class UpsDisplayFrame(wx.Frame):
         # Remove all info panels
         self.infoSizer.Clear(True)
         for node in config['nodes']['data']:
-            if self.displayAllNodes.IsChecked() or node['main']:
+            if self.displayAllNodes.IsChecked() or node['showmain']:
                 # Build Node object and add to display
-                nodepanel = NodeItem(self, node)
-                self.infoSizer.Add(nodepanel)
-                self.infoSizer.Fit(self)
+                nodebutton = NodeItem(self, size=wx.Size(70, 70), nodeinfo=node)
+                # self.infoSizer.Add(nodebutton)
+                self.infoSizer.Add(nodebutton, 0, wx.ALL, 5)
+                # self.infoSizer.Fit(self)
+                self.Bind(wx.EVT_BUTTON, self.OnNodeItemSelected, nodebutton)
 
-        self.infoSizer.Layout()
+        self.mainPanel.Layout()
         self.Fit()
+    
 
     def PutConfig(self, config):
         try:
@@ -185,8 +181,14 @@ class UpsDisplayFrame(wx.Frame):
 
         self.LoadObjects(config)
         
+    def OnNodeItemSelected(self, event):
+        item = event.GetEventObject()
+        print("OnNodeItemSelected: %s '%s'" % (item.GetName(), item.nodeinfo))
+        event.Skip()
+
     def OnShowAllClicked(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         self.LoadObjects()
         event.Skip()
 # end of class UpsDisplayFrame
+
 

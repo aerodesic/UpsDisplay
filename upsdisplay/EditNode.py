@@ -123,11 +123,11 @@ class EditNode(wx.Dialog):
             # print("Removed %s from node list: %s" % (data, list_of_nodes))
             control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
 
-        elif schema == "<zero-or-more-node>":
+        elif schema == "<zero-or-more-nodes>":
             control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more", title="Zero or more nodes"))
 
-        elif schema == "<one-or-more-node>":
+        elif schema == "<one-or-more-nodes>":
             control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
             control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more", title="One or more nodes"))
 

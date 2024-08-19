@@ -26,7 +26,7 @@ class TextCheckboxSelect(wx.Dialog):
         wx.Dialog.__init__(self, *args, **kwds)
         self.SetTitle(_("Select zero or more items"))
 
-        mainSizer = wx.FlexGridSizer(6, 1, 0, 0)
+        mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
         self.choiceList = wx.CheckListBox(self, wx.ID_ANY, choices=[_("a"), _("b"), _("c")], style=wx.LB_SINGLE)
         self.choiceList.Clear()
