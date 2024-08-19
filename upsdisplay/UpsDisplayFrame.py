@@ -7,6 +7,7 @@ import wx
 # begin wxGlade: dependencies
 # end wxGlade
 
+import random
 import json
 # begin wxGlade: extracode
 from EditTable import *
@@ -34,37 +35,59 @@ CONFIGFILE = ".upsdisplay"
 
 from config import DEFAULT_CONFIG
 
+class NodeStatus:
+    UNKNOWN = "Unknown"
+    STOPPED = "Stopped"
+    STARTING = "Starting"
+    RUNNING = "Running"
+    STOPPING = "Stopping"
+    ERROR = "Error"
+        
 class NodeItem(wx.Button):
     def __init__(self, parent, id=wx.ID_ANY, label="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
         print("NodeItem: %s" % (str(nodeinfo)))
 
+        self.status = None
         self.nodeinfo = nodeinfo
 
         super(NodeItem, self).__init__(parent, id, label, pos, size, style, validator, name)
-        self.SetLabel("%s\n%s" % (nodeinfo['name'], "<Status>"))
-
-        # mainSizer = wx.FlexGridSizer(3, 1, 0, 0)
+        # self.SetLabel("%s\n%s" % (nodeinfo['name'], "<Status>"))
 
         font=wx.Font(8, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
         self.SetFont(font)
 
-        # Title at the top
-        # self.title = wx.StaticText(self, label=self.nodename)
-        # self.SetFont(font)
-        # mainSizer.Add(self.title, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
-
-        # Add an icon in the middle
-
-        # Info message at bottom
-        # self.info = wx.StaticText(self, label="<Status")
-        # self.info.SetFont(font)
-        # mainSizer.Add(self.info, wx.EXPAND | wx.ALIGN_LEFT | wx.ALL, 0)
-
-        self.SetBackgroundColour(wx.BLUE)
-        self.SetForegroundColour(wx.WHITE)
+        self.SetStatus(NodeStatus.UNKNOWN)
 
     def SetInfo(self, info):
         self.info.SetLabel(info)
+
+    def SetStatus(self, status=NodeStatus.UNKNOWN, msg=None):
+        if status != self.status:
+            if status == NodeStatus.STOPPED:
+                self.SetBackgroundColour(wx.NamedColour("white"))
+                self.SetForegroundColour(wx.NamedColour("black"))
+
+            elif status == NodeStatus.STARTING:
+                self.SetBackgroundColour(wx.NamedColour("yellow"))
+                self.SetForegroundColour(wx.NamedColour("black"))
+
+            elif status == NodeStatus.RUNNING:
+                self.SetBackgroundColour(wx.NamedColour("green"))
+                self.SetForegroundColour(wx.NamedColour("white"))
+
+            elif status == NodeStatus.STOPPING:
+                self.SetBackgroundColour(wx.NamedColour("orange"))
+                self.SetForegroundColour(wx.NamedColour("black"))
+
+            elif status == NodeStatus.UNKNOWN:
+                self.SetBackgroundColour(wx.NamedColour("black"))
+                self.SetForegroundColour(wx.NamedColour("red"))
+
+            elif status == NodeStatus.ERROR:
+                self.SetBackgroundColour(wx.NamedColour("red"))
+                self.SetForegroundColour(wx.NamedColour("white"))
+
+        self.SetLabel("%s\n%s" % (self.nodeinfo['name'], msg if msg else status))
 
 class UpsDisplayFrame(wx.Frame):
     def __init__(self, *args, **kwds):
@@ -184,6 +207,22 @@ class UpsDisplayFrame(wx.Frame):
     def OnNodeItemSelected(self, event):
         item = event.GetEventObject()
         print("OnNodeItemSelected: %s '%s'" % (item.GetName(), item.nodeinfo))
+        random_status = int(random.random() * 6)
+
+        if random_status == 0:
+            status = NodeStatus.UNKNOWN
+        elif random_status == 1:
+            status = NodeStatus.STARTING
+        elif random_status == 2:
+            status = NodeStatus.RUNNING
+        elif random_status == 3:
+            status = NodeStatus.STOPPING
+        elif random_status == 4:
+            status = NodeStatus.STOPPED
+        else:
+            status = NodeStatus.ERROR
+
+        item.SetStatus(status)
         event.Skip()
 
     def OnShowAllClicked(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
