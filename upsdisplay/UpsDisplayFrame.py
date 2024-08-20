@@ -64,28 +64,28 @@ class NodeItem(wx.Button):
     def SetStatus(self, status=NodeStatus.UNKNOWN, msg=None):
         if status != self.status:
             if status == NodeStatus.STOPPED:
-                self.SetBackgroundColour(wx.NamedColour("white"))
-                self.SetForegroundColour(wx.NamedColour("black"))
+                self.SetBackgroundColour(wx.Colour("white"))
+                self.SetForegroundColour(wx.Colour("black"))
 
             elif status == NodeStatus.STARTING:
-                self.SetBackgroundColour(wx.NamedColour("yellow"))
-                self.SetForegroundColour(wx.NamedColour("black"))
+                self.SetBackgroundColour(wx.Colour("yellow"))
+                self.SetForegroundColour(wx.Colour("black"))
 
             elif status == NodeStatus.RUNNING:
-                self.SetBackgroundColour(wx.NamedColour("green"))
-                self.SetForegroundColour(wx.NamedColour("white"))
+                self.SetBackgroundColour(wx.Colour("green"))
+                self.SetForegroundColour(wx.Colour("white"))
 
             elif status == NodeStatus.STOPPING:
-                self.SetBackgroundColour(wx.NamedColour("orange"))
-                self.SetForegroundColour(wx.NamedColour("black"))
+                self.SetBackgroundColour(wx.Colour("orange"))
+                self.SetForegroundColour(wx.Colour("black"))
 
             elif status == NodeStatus.UNKNOWN:
-                self.SetBackgroundColour(wx.NamedColour("black"))
-                self.SetForegroundColour(wx.NamedColour("red"))
+                self.SetBackgroundColour(wx.Colour("black"))
+                self.SetForegroundColour(wx.Colour("red"))
 
             elif status == NodeStatus.ERROR:
-                self.SetBackgroundColour(wx.NamedColour("red"))
-                self.SetForegroundColour(wx.NamedColour("white"))
+                self.SetBackgroundColour(wx.Colour("red"))
+                self.SetForegroundColour(wx.Colour("white"))
 
         self.SetLabel("%s\n%s" % (self.nodeinfo['name'], msg if msg else status))
 
