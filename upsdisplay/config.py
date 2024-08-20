@@ -1,3 +1,15 @@
+# Table schema options are:
+# Options are:
+#   '<unique-node>'                           # Select a node name that is not already in the nodes.data table
+#   '<zero-or-more-nodes>'                    # A list of zero or more node names
+#   '<one-or-more-nodes>'                     # A list of one or more node names
+#   '<one-of-node>'                           # A single node name
+#   [ '<zero-or-more>' 'item' 'item' ... ]    # Zero of more from a list of string items
+#   [ '<one-or-more>' 'item' 'item' ... ]     # One of more from a list of string items
+#   [ '<one-of>' 'item' 'item' ... ]          # One from a list of string items
+#   '<str>'                                   # A generic string
+#   '<bool>'                                  # A boolean item (value cell is True or False and display value is Yes or No)
+
 DEFAULT_CONFIG = {
     "version": 1,
     "global": {
@@ -6,17 +18,24 @@ DEFAULT_CONFIG = {
     "available": [
         # List of available devices seen by scanner
     ],
+    "devices": {
+        # Editing schema infomration (format of each field)
+        "schema": {
+        },
+        # Headers to display
+        "headers": {
+        },
+        # Default values when creating new entry
+        "default": {
+        },
+        # Fields to show in record edit dialog
+        "edit_fidlds": [
+        ],
+        # Fields to show in table view
+        "table_fields": [
+        ],
+    },
     "nodes": {
-        # Options are:
-        #   '<unique-node>'                           # Select a node name that is not already in the nodes.data table
-        #   '<zero-or-more-nodes>'                    # A list of zero or more node names
-        #   '<one-or-more-nodes>'                     # A list of one or more node names
-        #   '<one-of-node>'                           # A single node name
-        #   [ '<zero-or-more>' 'item' 'item' ... ]    # Zero of more from a list of string items
-        #   [ '<one-or-more>' 'item' 'item' ... ]     # One of more from a list of string items
-        #   [ '<one-of>' 'item' 'item' ... ]          # One from a list of string items
-        #   '<str>'                                   # A generic string
-        #   '<bool>'                                  # A boolean item (value cell is True or False and display value is Yes or No)
         "schema": {
             "name": "<unique-node>",                  # name is a unique node name
             "dns": "<str>",                           # dns is a string (but should be smarter)

@@ -29,21 +29,19 @@ import numpy as np
 import json
 from vartab import *
 import math
-from ConfigDialog import *
 
 CONFIGFILE = ".upsdisplay"
 
 from config import DEFAULT_CONFIG
 
-class NodeStatus:
+class NodeItem(wx.Button):
     UNKNOWN = "Unknown"
     STOPPED = "Stopped"
     STARTING = "Starting"
     RUNNING = "Running"
     STOPPING = "Stopping"
     ERROR = "Error"
-        
-class NodeItem(wx.Button):
+
     def __init__(self, parent, id=wx.ID_ANY, label="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
         print("NodeItem: %s" % (str(nodeinfo)))
 
@@ -56,34 +54,34 @@ class NodeItem(wx.Button):
         font=wx.Font(8, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
         self.SetFont(font)
 
-        self.SetStatus(NodeStatus.UNKNOWN)
+        self.SetStatus(self.UNKNOWN)
 
     def SetInfo(self, info):
         self.info.SetLabel(info)
 
-    def SetStatus(self, status=NodeStatus.UNKNOWN, msg=None):
+    def SetStatus(self, status=UNKNOWN, msg=None):
         if status != self.status:
-            if status == NodeStatus.STOPPED:
+            if status == self.STOPPED:
                 self.SetBackgroundColour(wx.Colour("white"))
                 self.SetForegroundColour(wx.Colour("black"))
 
-            elif status == NodeStatus.STARTING:
+            elif status == self.STARTING:
                 self.SetBackgroundColour(wx.Colour("yellow"))
                 self.SetForegroundColour(wx.Colour("black"))
 
-            elif status == NodeStatus.RUNNING:
+            elif status == self.RUNNING:
                 self.SetBackgroundColour(wx.Colour("green"))
                 self.SetForegroundColour(wx.Colour("white"))
 
-            elif status == NodeStatus.STOPPING:
+            elif status == self.STOPPING:
                 self.SetBackgroundColour(wx.Colour("orange"))
                 self.SetForegroundColour(wx.Colour("black"))
 
-            elif status == NodeStatus.UNKNOWN:
+            elif status == self.UNKNOWN:
                 self.SetBackgroundColour(wx.Colour("black"))
                 self.SetForegroundColour(wx.Colour("red"))
 
-            elif status == NodeStatus.ERROR:
+            elif status == self.ERROR:
                 self.SetBackgroundColour(wx.Colour("red"))
                 self.SetForegroundColour(wx.Colour("white"))
 
@@ -151,7 +149,7 @@ class UpsDisplayFrame(wx.Frame):
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         config = self.GetConfig()
 
-        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"], table_fields=config['nodes']['table_fields'], edit_fields=config['nodes']['edit_fields'], editEntry=EditNode)
+        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"])
         if dlg.ShowModal() == wx.ID_OK:
             print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
             if dlg.IsDataChanged():
@@ -210,17 +208,17 @@ class UpsDisplayFrame(wx.Frame):
         random_status = int(random.random() * 6)
 
         if random_status == 0:
-            status = NodeStatus.UNKNOWN
+            status = NodeItem.UNKNOWN
         elif random_status == 1:
-            status = NodeStatus.STARTING
+            status = NodeItem.STARTING
         elif random_status == 2:
-            status = NodeStatus.RUNNING
+            status = NodeItem.RUNNING
         elif random_status == 3:
-            status = NodeStatus.STOPPING
+            status = NodeItem.STOPPING
         elif random_status == 4:
-            status = NodeStatus.STOPPED
+            status = NodeItem.STOPPED
         else:
-            status = NodeStatus.ERROR
+            status = NodeItem.ERROR
 
         item.SetStatus(status)
         event.Skip()

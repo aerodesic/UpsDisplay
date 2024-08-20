@@ -61,16 +61,17 @@ class MyListCtrl(ULC.UltimateListCtrl):
 # editEntry is an optional dialog used to edit a table entry
 #
 class EditTable(wx.Dialog):
-    def __init__(self, parent=None, title="Edit Table", config=None, table_fields=[], edit_fields=[], headers=[], editEntry=None, *args, **kwds):
+    def __init__(self, parent=None, title="Edit Table", config=[], table_fields=None, edit_fields=None, headers=None, editEntry=None, *args, **kwds):
         self.parent = parent
         self.config = config
-        self.data = deepcopy(config["data"])
-        self.schema = config["schema"]
-        self.table_fields = table_fields
-        self.edit_fields = edit_fields
-        self.headers = [config["headers"][node] for node in table_fields]
         self.editEntry = editEntry
         self.data_changed = False
+
+        self.data = deepcopy(config["data"])
+        self.table_fields = table_fields if table_fields is not None else config["table_fields"]
+        self.edit_fields = edit_fields if edit_fields is not None else config["edit_fields"]
+        self.headers = headers if headers is not None else [config["headers"][node] for node in table_fields]
+        self.schema = schema if schema is not None else config["schema"]
 
         kwds['parent'] = parent
 
