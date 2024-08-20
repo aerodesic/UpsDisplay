@@ -144,7 +144,7 @@ class EditTable(wx.Dialog):
             results = dlg.ShowModal()
             if results == wx.ID_OK:
                 # Change the parent data element with the results
-                # print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
+                print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
                 if dlg.IsDataChanged():
                     results = dlg.GetResults()
                     if len(results['name']) != 0:

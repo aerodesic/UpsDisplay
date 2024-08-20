@@ -101,6 +101,7 @@ class EditNode(wx.Dialog):
     # "[ '<zero-or-more>' 'item', 'item', 'item' ]      a choice of zero or more items
     # "[ '<one-or-more>' 'item', 'item', 'item' ]       a choice of one or more items
     # "<bool>"                                          a selector of Yes or No with Yes being True
+    # "<icon>"                                          an icon file
     #
     # Returns a tuple:
     #    <static string with field label>, <control for editing results>
@@ -164,6 +165,14 @@ class EditNode(wx.Dialog):
             elif schema[0] == "<one-or-more>":
                 control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name)
                 control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=schema[1:], choose="one-or-more", title="One or more"))
+        elif schema == "<icon>":
+            # Try to load the bitmap from the data string
+            bitmap = wx.Bitmap()
+            if type(data) is str and bitmap.LoadFile(data):
+                control = wx.BitmapButton(self, size=wx.Size(50, 50), bitmap=bitmap, name=name)
+            else:
+                control = wx.BitmapButton(self, size=wx.Size(50, 50), name=name)
+            control.Bind(wx.EVT_BUTTON, self.OnEditIconButton)
 
         if control is None:
             # dlg = ShowMessage("Weird error")
@@ -255,6 +264,29 @@ class EditNode(wx.Dialog):
             # Set the displayed value of the item
             item.SetValue(items[0])
             self.data_changed = True
+
+    def OnEditIconButton(self, event):
+        item = event.GetEventObject()
+
+        # Ask user for new icon file
+        with wx.FileDialog(self, "Select icon", wildcard="Image Files(*.bmp;*.gif;*.png;*.svg)|*.bmp;*.gif;*.png;*.svg",
+                       style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
+
+            if fileDialog.ShowModal() == wx.ID_OK:
+                pathname = fileDialog.GetPath()
+                print("OnEditIconButton: pathname %s" % pathname)
+                try:
+                    bitmap = wx.Bitmap()
+                    if bitmap.LoadFile(pathname):
+                        item.SetBitmap(bitmap)
+                        self.data[item.GetName()] = pathname
+                        self.data_changed = True
+                    else:
+                        print("OnEditIconButton: cannot load file")
+
+                except Exception as e:
+                    print("OnEditIconButton exception %s" % str(e))
+
 
     # Process OK and put the data back into the configuration table entry identified by 'name'
     def OnOkButton(self, event):  # wxGlade: EditNode.<event_handler>

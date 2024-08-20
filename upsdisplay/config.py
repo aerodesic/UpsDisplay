@@ -38,6 +38,7 @@ DEFAULT_CONFIG = {
     "nodes": {
         "schema": {
             "name": "<unique-node>",                  # name is a unique node name
+            "icon": "<icon>",                         # Device icon
             "dns": "<str>",                           # dns is a string (but should be smarter)
             "uri": "<str>",                           # uri is a string (but should be smarter)
             "requires": "<zero-or-more-nodes>",       # requires is a list of <node names>
@@ -48,6 +49,7 @@ DEFAULT_CONFIG = {
         },
         "headers": {
             "name": "Name",
+            "icon": "Icon",
             "dns": "Dns",
             "uri": "URI",
             "requires": "Requires",
@@ -67,6 +69,7 @@ DEFAULT_CONFIG = {
         # Include these in the detailed edit dialog, in order of display
         'edit_fields': [
             'name',
+            'icon',
             'dns',
             'uri',
             'requires',
@@ -78,6 +81,7 @@ DEFAULT_CONFIG = {
         # A default setting when creating a new entry
         'default': {
             "name": None,
+            "icon": None,
             "dns": "",
             "uri": "",
             "requires": [],
@@ -88,6 +92,7 @@ DEFAULT_CONFIG = {
         },
         "data": [{
             "name": "Nimbus",
+            "icon": None,
             "dns": "nimbus.aerodesic.net",
             "uri": "APC1:1",
             "requires": ["Nas3"],
@@ -97,6 +102,7 @@ DEFAULT_CONFIG = {
             "showmain": True,
         },{
             "name": "Cirrus",
+            "icon": None,
             "dns": "cirrus.aerodesic.net",
             "uri": "APC1:2",
             "requires": ["Nas3"],
@@ -106,6 +112,7 @@ DEFAULT_CONFIG = {
             "showmain": True,
         },{
             "name": "Cumulus",
+            "icon": None,
             "dns": "cumulus.aerodesic.net",
             "uri": "APC1:3",
             "requires": ["Nas3"],
@@ -115,6 +122,7 @@ DEFAULT_CONFIG = {
             "showmain": True,
         },{
             "name": "Nas1",
+            "icon": None,
             "dns": "nas1.aerodesic.net",
             "uri": "APC1:4",
             "requires": ["Nas3"],
@@ -124,6 +132,7 @@ DEFAULT_CONFIG = {
             "showmain": False,
         },{
             "name": "Nas2",
+            "icon": None,
             "dns": "nimbus.aerodesic.net",
             "uri": "APC1:5",
             "requires": ["Nas3"],
@@ -133,6 +142,7 @@ DEFAULT_CONFIG = {
             "showmain": False,
         },{
             "name": "Nas3",
+            "icon": None,
             "dns": "nas3.aerodesic.net",
             "uri": "APC1:6",
             "requires": [],
@@ -142,6 +152,7 @@ DEFAULT_CONFIG = {
             "showmain": False,
         },{
             "name": "Gatekeeper",
+            "icon": None,
             "dns": "gatekeeper.aerodesic.net",
             "uri": "APC1:7",
             "requires": [ "DmzSwitch", "NasSwitch" ],
@@ -151,6 +162,7 @@ DEFAULT_CONFIG = {
             "showmain": False,
         },{
             "name": "DmzSwitch",
+            "icon": None,
             "dns": "",
             "uri": "APC1:8",
             "requires": [],
@@ -160,6 +172,7 @@ DEFAULT_CONFIG = {
             "showmain": False,
         },{
             "name": "NasSwitch",
+            "icon": None,
             "dns": "",
             "uri": "APC2:1",
             "requires": [],
