@@ -51,7 +51,7 @@ class NodeItem(wx.Button):
         super(NodeItem, self).__init__(parent, id, label, pos, size, style, validator, name)
         # self.SetLabel("%s\n%s" % (nodeinfo['name'], "<Status>"))
 
-        font=wx.Font(8, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
+        font=wx.Font(10, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
         self.SetFont(font)
 
         self.SetStatus(self.UNKNOWN)
@@ -177,10 +177,8 @@ class UpsDisplayFrame(wx.Frame):
         for node in config['nodes']['data']:
             if self.displayAllNodes.IsChecked() or node['showmain']:
                 # Build Node object and add to display
-                nodebutton = NodeItem(self, size=wx.Size(70, 70), nodeinfo=node)
-                # self.infoSizer.Add(nodebutton)
+                nodebutton = NodeItem(self.mainPanel, size=wx.Size(100, 100), nodeinfo=node)
                 self.infoSizer.Add(nodebutton, 0, wx.ALL, 5)
-                # self.infoSizer.Fit(self)
                 self.Bind(wx.EVT_BUTTON, self.OnNodeItemSelected, nodebutton)
 
         self.mainPanel.Layout()
