@@ -22,6 +22,12 @@ class EditNode(wx.Dialog):
         self.headers = headers # Headers for node being edited
         self.edit_fields = edit_fields
 
+        # print("EditNode: config %s" % config)
+        # print("          edit_fields %s" % edit_fields)
+        # print("          schema %s" % schema)
+        # print("          headers %s" % headers)
+        # print("          data %s" % data)
+
         self.data_changed = False
 
         kwds["parent"] = parent
@@ -40,20 +46,20 @@ class EditNode(wx.Dialog):
 
         # Generate edit items
         rows=0
-        print("data is %s" % self.data)
+        # print("data is %s" % self.data)
         for field in self.edit_fields:
             schema = self.schema[field]
             description = self.headers[field]
             static_text, control = self.create_edit_entry(schema, description, field)
             if control is not None:
                 rows = rows + 1
-                print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))
+                # print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))
                 self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
                 self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
 
         self.itemSizer.SetRows(rows)
         self.Fit()
-        print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
+        # print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
 
         # End of generated edit items
         self.buttonOk = wx.Button(self, wx.ID_OK, _("OK"))
@@ -109,7 +115,7 @@ class EditNode(wx.Dialog):
 
         data = self.data[name]
 
-        print("create_edit_entry: schema '%s' description '%s' name '%s' data '%s'" % (schema, description, name, self.data[name]))
+        # print("create_edit_entry: schema '%s' description '%s' name '%s' data '%s'" % (schema, description, name, self.data[name]))
         if schema == "<unique-node>":
             # Create a TextCtrl with an editing function to check for a unique node name
             control = wx.TextCtrl(self, wx.ID_ANY, self.data[name], name=name)
@@ -195,16 +201,16 @@ class EditNode(wx.Dialog):
         selected = self.data[item.GetName()]
         if selected is None:
             selected = []
-        print("Event handler: OnCheckboxMultiple")
+        # print("Event handler: OnCheckboxMultiple")
         dlg = TextCheckboxSelect(self, choose=choose, choices=choices, selected=selected, title=title)
         if dlg.ShowModal() == wx.ID_OK:
             # Put the seletions back into the object
             items = dlg.GetSelectedItems()
             if items != self.data[item.GetName()]:
                 # Put data back into config structure
-                print("data before update: %s" % str(self.data))
+                # print("data before update: %s" % str(self.data))
                 self.data[item.GetName()] = items
-                print("data after update: %s" % str(self.data))
+                # print("data after update: %s" % str(self.data))
                 # Set the displayed value of the item
                 item.SetValue(", ".join(items))
                 self.data_changed = True
@@ -214,7 +220,7 @@ class EditNode(wx.Dialog):
     def OnCheckboxOneOf(self, event, choices, title="Choose one node"):
         item = event.GetEventObject()
 
-        print("OnCheckboxOneOf: item is %s" % item.GetName())
+        # print("OnCheckboxOneOf: item is %s" % item.GetName())
 
         selected = self.data[item.GetName()]
         if selected is None:
@@ -238,7 +244,7 @@ class EditNode(wx.Dialog):
 
         selected = choices[0] if self.data[item.GetName()] else choices[1]
 
-        print("OnCheckboxBoolean: choices is %s selected is %s" % (choices, selected))
+        # print("OnCheckboxBoolean: choices is %s selected is %s" % (choices, selected))
 
         # Open the dialog
         dlg = TextCheckboxSelect(self, choose="one-of", choices=choices, selected=[selected], title="Yes or No")

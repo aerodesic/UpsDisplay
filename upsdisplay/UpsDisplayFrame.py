@@ -43,7 +43,7 @@ class NodeItem(wx.Button):
     ERROR = "Error"
 
     def __init__(self, parent, id=wx.ID_ANY, label="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
-        print("NodeItem: %s" % (str(nodeinfo)))
+        # print("NodeItem: %s" % (str(nodeinfo)))
 
         self.status = None
         self.nodeinfo = nodeinfo
@@ -97,34 +97,29 @@ class UpsDisplayFrame(wx.Frame):
 
         self.mainPanel = wx.Panel(self, wx.ID_ANY)
 
-        self.mainSizer = wx.FlexGridSizer(3, 1, 5, 5)
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        buttonSizer = wx.FlexGridSizer(1, 3, 5, 10)
-        self.mainSizer.Add(buttonSizer, 1, wx.ALIGN_RIGHT, 0)
+        self.controlSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainSizer.Add(self.controlSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 0)
 
         self.displayAllNodes = wx.CheckBox(self.mainPanel, wx.ID_ANY, _("Show All"))
         self.displayAllNodes.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.displayAllNodes, 1, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 3)
+        self.controlSizer.Add(self.displayAllNodes, 1, wx.ALIGN_CENTER_VERTICAL, 3)
 
         self.nodeConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Nodes"))
         self.nodeConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.nodeConfigButton, 1, wx.ALIGN_CENTER_VERTICAL, 0)
+        self.controlSizer.Add(self.nodeConfigButton, 1, wx.ALL, 0)
 
         self.deviceConfigButton = wx.Button(self.mainPanel, wx.ID_ANY, _("Devices"))
         self.deviceConfigButton.SetFont(wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        buttonSizer.Add(self.deviceConfigButton, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
+        self.controlSizer.Add(self.deviceConfigButton, 0, 0, 0)
 
         self.text_ctrl_1 = wx.TextCtrl(self.mainPanel, wx.ID_ANY, "", style=wx.TE_READONLY)
-        self.mainSizer.Add(self.text_ctrl_1, 1, wx.EXPAND, 0)
+        self.mainSizer.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
 
         self.infoSizer = wx.WrapSizer(wx.HORIZONTAL)
-        self.mainSizer.Add(self.infoSizer, 1, wx.ALL | wx.EXPAND, 5)
+        self.mainSizer.Add(self.infoSizer, 0, wx.ALL, 5)
 
-        buttonSizer.AddGrowableRow(0)
-        buttonSizer.AddGrowableCol(0)
-
-        self.mainSizer.AddGrowableRow(2)
-        self.mainSizer.AddGrowableCol(0)
         self.mainPanel.SetSizer(self.mainSizer)
 
         self.mainSizer.Fit(self)
@@ -142,16 +137,16 @@ class UpsDisplayFrame(wx.Frame):
         pass
 
     def OnClose(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print('OnClose called')
+        # print('OnClose called')
         self.CloseUps()
         event.Skip()
 
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         config = self.GetConfig()
 
-        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"])
+        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"], editEntry=EditNode)
         if dlg.ShowModal() == wx.ID_OK:
-            print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
+            # print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
             if dlg.IsDataChanged():
                 config['nodes']['data'] = dlg.GetResults()
                 self.PutConfig(config)
@@ -204,7 +199,7 @@ class UpsDisplayFrame(wx.Frame):
         
     def OnNodeItemSelected(self, event):
         item = event.GetEventObject()
-        print("OnNodeItemSelected: %s '%s'" % (item.GetName(), item.nodeinfo))
+        # print("OnNodeItemSelected: %s '%s'" % (item.GetName(), item.nodeinfo))
         random_status = int(random.random() * 6)
 
         if random_status == 0:

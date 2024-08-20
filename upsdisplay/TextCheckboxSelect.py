@@ -18,9 +18,11 @@ class TextCheckboxSelect(wx.Dialog):
         self.choose = choose
         self.choices = choices
         self.selected = selected
-        print("TextCheckboxSelect: choose %s" % choose)
-        print("                    choices %s" % str(choices))
-        print("                    selected %s" % str(selected))
+
+        # print("TextCheckboxSelect: choose %s" % choose)
+        # print("                    choices %s" % str(choices))
+        # print("                    selected %s" % str(selected))
+
         # begin wxGlade: TextCheckboxSelect.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
@@ -64,7 +66,7 @@ class TextCheckboxSelect(wx.Dialog):
 
     # Return the current selected items in the checkbox list
     def GetSelectedItems(self):
-        print("TextCheckboxSelect: GetSelectedItems returning %s" % str(list(self.choiceList.GetCheckedStrings())))
+        # print("TextCheckboxSelect: GetSelectedItems returning %s" % str(list(self.choiceList.GetCheckedStrings())))
         return list(self.choiceList.GetCheckedStrings())
 
     def OnCheckboxItemSelected(self, event):  # wxGlade: TextCheckboxSelect.<event_handler>
@@ -75,7 +77,7 @@ class TextCheckboxSelect(wx.Dialog):
             item.SetCheckedItems([selected])
         elif self.choose == "one-or-more":
             # If no items left selected, reselect this last deselected item
-            print("Number of items selected: %s  this selectioni %d" % (item.GetSelections(), event.GetSelection()))
+            # print("Number of items selected: %s  this selectioni %d" % (item.GetSelections(), event.GetSelection()))
             if len(item.GetCheckedItems()) == 0:
                 item.SetCheckedItems([event.GetSelection()])
         else:

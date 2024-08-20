@@ -23,7 +23,7 @@ class MyListCtrl(ULC.UltimateListCtrl):
         self.InsertColumn(self.GetColumnCount(), header, format=ULC.ULC_FORMAT_LEFT)
 
     def AppendRow(self, datalist):
-        print("Append: %s" % datalist)
+        # print("Append: %s" % datalist)
         row = self.InsertStringItem(sys.maxsize, datalist[0])
         for column in range(1, len(datalist)):
             field = datalist[column]
@@ -57,20 +57,22 @@ class MyListCtrl(ULC.UltimateListCtrl):
 # data is the base of the config tree of data to be selected as a table
 # table_fields is the fields within each data element that will be displayed in the list
 # edit_fields is passed to the editEntry dialog to define the total fields for editing
+# schema is the schema definition for the table entry
 # headers is the display-form of the field name (e.g. field='name' header='Node'
 # editEntry is an optional dialog used to edit a table entry
 #
 class EditTable(wx.Dialog):
-    def __init__(self, parent=None, title="Edit Table", config=[], table_fields=None, edit_fields=None, headers=None, editEntry=None, *args, **kwds):
+    def __init__(self, parent=None, title="Edit Table", config=[], table_fields=None, edit_fields=None, schema=None, headers=None, editEntry=None, *args, **kwds):
         self.parent = parent
         self.config = config
         self.editEntry = editEntry
         self.data_changed = False
-
         self.data = deepcopy(config["data"])
+
         self.table_fields = table_fields if table_fields is not None else config["table_fields"]
         self.edit_fields = edit_fields if edit_fields is not None else config["edit_fields"]
-        self.headers = headers if headers is not None else [config["headers"][node] for node in table_fields]
+        # self.headers = headers if headers is not None else [ config["headers"][node] for node in self.edit_fields ]
+        self.headers = headers if headers is not None else config['headers']
         self.schema = schema if schema is not None else config["schema"]
 
         kwds['parent'] = parent
@@ -130,13 +132,19 @@ class EditTable(wx.Dialog):
         row = event.GetIndex()
         itemdata = deepcopy(self.data[row])
 
+        # print("OnItemSelected: row %d" % row)
+        # print("                schema %s" % self.schema)
+        # print("                edit_fields %s" % self.edit_fields)
+        # print("                headers %s" % self.headers)
+        # print("                data %s" % itemdata)
+
         if self.editEntry is not None:
             # Must pass original headers 'dict' to get mappings
-            dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.config["headers"], data=itemdata)
+            dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.headers, data=itemdata)
             results = dlg.ShowModal()
             if results == wx.ID_OK:
                 # Change the parent data element with the results
-                print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
+                # print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
                 if dlg.IsDataChanged():
                     results = dlg.GetResults()
                     if len(results['name']) != 0:
@@ -149,12 +157,14 @@ class EditTable(wx.Dialog):
                         self.data_changed = True
             elif results == wx.ID_DELETE:
                 # Delete this entry
-                print("Delete request on row %d" % row)
+                # print("Delete request on row %d" % row)
                 del(self.data[row])
                 self.RedrawItemList()
                 self.data_changed = True
             else:
                 print("editEntry failed")
+        else:
+            print("no editEntry")
                 
         event.Skip()
 
@@ -170,7 +180,7 @@ class EditTable(wx.Dialog):
             dlg = self.editEntry(self, config=self.config, schema=self.schema, edit_fields=self.edit_fields, headers=self.config["headers"], data=itemdata)
             if dlg.ShowModal() == wx.ID_OK:
                 # Change the parent data element with the results
-                print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
+                # print("Results: changed %s row %s data %s" % (dlg.IsDataChanged(), row, dlg.GetResults()))
                 if dlg.IsDataChanged():
                     self.data.append(dlg.GetResults())
                     self.RedrawItemList()
