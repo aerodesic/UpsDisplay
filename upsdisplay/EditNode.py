@@ -47,19 +47,21 @@ class EditNode(wx.Dialog):
         mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
         # Generate edit items
-        rows=0
+        row=0
         # print("data is %s" % self.data)
         for field in self.edit_fields:
             schema = self.schema[field]
             description = self.headers[field]
-            static_text, control = self.create_edit_entry(schema, description, field)
+            static_text, control, growable, = self.create_edit_entry(schema, description, field)
             if control is not None:
-                rows = rows + 1
-                # print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))
+                # print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (row, field, description, schema))
                 self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
                 self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
+                if growable:
+                    self.itemSizer.AddGrowableRow(row)
+                row = row + 1
 
-        self.itemSizer.SetRows(rows)
+        self.itemSizer.SetRows(row)
         self.Fit()
         # print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
 
@@ -115,6 +117,7 @@ class EditNode(wx.Dialog):
         # print("                   config %s" % (self.config))
         control = None
         static_text = None
+        growable = False
 
         data = self.data[name]
 
@@ -171,6 +174,7 @@ class EditNode(wx.Dialog):
             # Try to load the bitmap from the data string
             bitmap = wx.Bitmap()
             control = wx.BitmapButton(self, size=wx.Size(50, 50), name=name)
+            growable = True
 
             if type(data) is str and bitmap.LoadFile(data):
                 print("bitmap size is %s control is %s" % (bitmap.GetSize(), control.GetSize()))
@@ -186,7 +190,7 @@ class EditNode(wx.Dialog):
             # Create the static text
             static_text = wx.StaticText(self, label=description + ":")
             
-        return static_text, control
+        return static_text, control, growable
 
 
     def OnTextEnter(self, event):  # wxGlade: EditNode.<event_handler>

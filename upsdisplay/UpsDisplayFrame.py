@@ -36,7 +36,8 @@ CONFIGFILE = ".upsdisplay"
 
 from config import DEFAULT_CONFIG
 
-class NodeItem(wx.Button):
+# class NodeItem(wx.Button):
+class NodeItem(wx.BitmapButton):
     UNKNOWN = "Unknown"
     STOPPED = "Stopped"
     STARTING = "Starting"
@@ -44,14 +45,16 @@ class NodeItem(wx.Button):
     STOPPING = "Stopping"
     ERROR = "Error"
 
-    def __init__(self, parent, id=wx.ID_ANY, label="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
+    # def __init__(self, parent, id=wx.ID_ANY, label="\n", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
+    def __init__(self, parent, id=wx.ID_ANY, bitmap=wx.NullBitmap, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
         print("NodeItem: %s" % (str(nodeinfo)))
 
         self.bitmap = None
         self.status = None
         self.nodeinfo = nodeinfo
 
-        super(NodeItem, self).__init__(parent, id, label, pos, size, style, validator, name)
+        # super(NodeItem, self).__init__(parent, id, label, pos, size, style, validator, name)
+        super(NodeItem, self).__init__(parent, id, bitmap, pos, size, style, validator, name)
 
         font=wx.Font(10, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
         self.SetFont(font)
@@ -59,9 +62,9 @@ class NodeItem(wx.Button):
         if 'icon' in nodeinfo and nodeinfo['icon'] is not None:
             bitmap = wx.Bitmap()
             if bitmap.LoadFile(nodeinfo['icon']):
-                self.bitmap = scale_bitmap(bitmap, self.GetSize())
-                # self.bitmap = scale_bitmap(bitmap, wx.Size(20, 20))
-                self.SetBitmap(self.bitmap)
+                # self.bitmap = scale_bitmap(bitmap, self.GetSize())
+                self.bitmap = scale_bitmap(bitmap, wx.Size(20, 20))
+                self.SetBitmap(self.bitmap, wx.RIGHT)
 
         self.SetStatus(self.UNKNOWN)
         # self.Refresh()
@@ -101,9 +104,12 @@ class NodeItem(wx.Button):
 
         if self.bitmap is not None:
             print("SetStatus %s: Setting bitmap" % self.nodeinfo['name'])
-            self.SetBitmap(self.bitmap)
+            # self.SetBitmapLabel(self.bitmap)
+            # self.SetBitmapPosition(wx.RIGHT)
+            self.SetBitmap(self.bitmap, wx.RIGHT)
 
         self.SetLabel("%s\n%s" % (self.nodeinfo['name'], msg if msg else status))
+        # self.SetLabel("%s" % (self.nodeinfo['name']))
 
 class UpsDisplayFrame(wx.Frame):
     def __init__(self, *args, **kwds):
@@ -195,7 +201,7 @@ class UpsDisplayFrame(wx.Frame):
         for node in config['nodes']['data']:
             if self.displayAllNodes.IsChecked() or node['showmain']:
                 # Build Node object and add to display
-                nodebutton = NodeItem(self.mainPanel, size=wx.Size(100, 100), nodeinfo=node)
+                nodebutton = NodeItem(self.mainPanel, size=wx.Size(200, 100), nodeinfo=node)
                 self.infoSizer.Add(nodebutton, 0, wx.ALL, 5)
                 self.Bind(wx.EVT_BUTTON, self.OnNodeItemSelected, nodebutton)
 
