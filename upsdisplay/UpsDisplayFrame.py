@@ -7,6 +7,7 @@ import wx
 # begin wxGlade: dependencies
 # end wxGlade
 
+from tools import scale_bitmap
 import random
 import json
 # begin wxGlade: extracode
@@ -29,6 +30,7 @@ import numpy as np
 import json
 from vartab import *
 import math
+from wx.lib.platebtn import PlateButton
 
 CONFIGFILE = ".upsdisplay"
 
@@ -43,47 +45,63 @@ class NodeItem(wx.Button):
     ERROR = "Error"
 
     def __init__(self, parent, id=wx.ID_ANY, label="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
-        # print("NodeItem: %s" % (str(nodeinfo)))
+        print("NodeItem: %s" % (str(nodeinfo)))
 
+        self.bitmap = None
         self.status = None
         self.nodeinfo = nodeinfo
 
         super(NodeItem, self).__init__(parent, id, label, pos, size, style, validator, name)
-        # self.SetLabel("%s\n%s" % (nodeinfo['name'], "<Status>"))
 
         font=wx.Font(10, wx.FONTFAMILY_DEFAULT,  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, underline=False, faceName="Ubuntu", encoding=wx.FONTENCODING_DEFAULT)
         self.SetFont(font)
 
-        self.SetStatus(self.UNKNOWN)
+        if 'icon' in nodeinfo and nodeinfo['icon'] is not None:
+            bitmap = wx.Bitmap()
+            if bitmap.LoadFile(nodeinfo['icon']):
+                self.bitmap = scale_bitmap(bitmap, self.GetSize())
+                # self.bitmap = scale_bitmap(bitmap, wx.Size(20, 20))
+                self.SetBitmap(self.bitmap)
 
-    def SetInfo(self, info):
-        self.info.SetLabel(info)
+        self.SetStatus(self.UNKNOWN)
+        # self.Refresh()
+
+    # def SetInfo(self, info):
+    #    self.info.SetLabel(info)
 
     def SetStatus(self, status=UNKNOWN, msg=None):
         if status != self.status:
             if status == self.STOPPED:
-                self.SetBackgroundColour(wx.Colour("white"))
-                self.SetForegroundColour(wx.Colour("black"))
+                bgcolor = wx.Colour("white")
+                fgcolor = wx.Colour("black")
 
             elif status == self.STARTING:
-                self.SetBackgroundColour(wx.Colour("yellow"))
-                self.SetForegroundColour(wx.Colour("black"))
+                bgcolor = wx.Colour("yellow")
+                fgcolor = wx.Colour("black")
 
             elif status == self.RUNNING:
-                self.SetBackgroundColour(wx.Colour("green"))
-                self.SetForegroundColour(wx.Colour("white"))
+                bgcolor = wx.Colour("green")
+                fgcolor = wx.Colour("white")
 
             elif status == self.STOPPING:
-                self.SetBackgroundColour(wx.Colour("orange"))
-                self.SetForegroundColour(wx.Colour("black"))
+                bgcolor = wx.Colour("orange")
+                fgcolor = wx.Colour("black")
 
             elif status == self.UNKNOWN:
-                self.SetBackgroundColour(wx.Colour("black"))
-                self.SetForegroundColour(wx.Colour("red"))
+                bgcolor = wx.Colour("black")
+                fgcolor = wx.Colour("red")
 
             elif status == self.ERROR:
-                self.SetBackgroundColour(wx.Colour("red"))
-                self.SetForegroundColour(wx.Colour("white"))
+                bgcolor = wx.Colour("red")
+                fgcolor = wx.Colour("white")
+
+        self.SetBackgroundColour(bgcolor)
+        self.SetForegroundColour(fgcolor)
+        # self.SetLabelColor(fgcolor, fgcolor)
+
+        if self.bitmap is not None:
+            print("SetStatus %s: Setting bitmap" % self.nodeinfo['name'])
+            self.SetBitmap(self.bitmap)
 
         self.SetLabel("%s\n%s" % (self.nodeinfo['name'], msg if msg else status))
 

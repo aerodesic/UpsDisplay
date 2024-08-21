@@ -7,6 +7,8 @@ import wx
 # begin wxGlade: dependencies
 # end wxGlade
 
+from tools import scale_bitmap
+
 # begin wxGlade: extracode
 from ShowMessage import *
 from TextCheckboxSelect import *
@@ -168,10 +170,12 @@ class EditNode(wx.Dialog):
         elif schema == "<icon>":
             # Try to load the bitmap from the data string
             bitmap = wx.Bitmap()
+            control = wx.BitmapButton(self, size=wx.Size(50, 50), name=name)
+
             if type(data) is str and bitmap.LoadFile(data):
-                control = wx.BitmapButton(self, size=wx.Size(50, 50), bitmap=bitmap, name=name)
-            else:
-                control = wx.BitmapButton(self, size=wx.Size(50, 50), name=name)
+                print("bitmap size is %s control is %s" % (bitmap.GetSize(), control.GetSize()))
+                control.SetBitmap(scale_bitmap(bitmap, control.GetSize()))
+
             control.Bind(wx.EVT_BUTTON, self.OnEditIconButton)
 
         if control is None:
@@ -278,7 +282,8 @@ class EditNode(wx.Dialog):
                 try:
                     bitmap = wx.Bitmap()
                     if bitmap.LoadFile(pathname):
-                        item.SetBitmap(bitmap)
+                        print("OnEditIconButton: bitmap size %s" % str(bitmap.GetSize()))
+                        item.SetBitmap(scale_bitmap(bitmap, item.GetSize()))
                         self.data[item.GetName()] = pathname
                         self.data_changed = True
                     else:
