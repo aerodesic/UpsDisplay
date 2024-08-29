@@ -1,15 +1,59 @@
 # A very simple hierachical data storage
 
+import json
+import os
+from copy import deepcopy
+
 class VarTabException(Exception):
     pass
 
 class VarTab():
     MAX_RECURSION = 10
 
-    def __init__(self, init = {}):
-        self.__data = init
+    def __init__(self, config_file=None):
+        self.__config_file = config_file
 
-    def Load(self, values):
+    def Load(self, config_file = None, init=None):
+        if config_file is None:
+            config_file = self.__config_file
+
+        try:
+            # Try to load config file
+            with open(config_file, "r") as f:
+                self.__data = json.load(f)
+
+        except:
+            # No config file, so try to init from initial data
+            if init is None:
+               raise VarTabException("No initial config specified")
+
+            else:
+                self.__data = deepcopy(init)
+                
+    def __create_file_with_mode(self, path, flags, mode):
+        print("__create_file_with_mode: %s flags %o mode %o" % (path, flags, mode))
+        oldmask = os.umask(0)
+        f = os.open(path, flags, mode)
+        # If file already exists, set mode to override
+        os.chmod(path, mode)
+        # Put the mask back
+        os.umask(oldmask)
+        return f
+
+    def Save(self, config_file = None, mode = 0o600):
+        if config_file is None:
+            config_file = self.__config_file
+
+        if config_file is None:
+            raise VarTabException("No config file specified")
+
+        try:
+            with open(config_file, "w", opener=lambda path, flags: self.__create_file_with_mode(path, flags, mode)) as f:
+                f.write(json.dumps(self.__data, indent=4, sort_keys=True))
+        except Exception as e:
+            print("VarTab.Save: %s" % str(e))
+
+    def SetAllValues(self, values):
         self.__data = values
 
     def __getitem__(self, key=None):
@@ -17,9 +61,6 @@ class VarTab():
 
     def __setitem__(self, key, value):
         self.SetValue(key, value)
-
-    def Reset(self):
-        self.Load({})
 
     def FindValue(self, varname, subvar=None, write=False):
         varvalue = self.__data if subvar is None else subvar

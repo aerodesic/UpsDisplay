@@ -15,28 +15,15 @@ from EditTable import *
 from EditNode import *
 # end wxGlade
 
-import os
-os.umask(0)
-def create_private(path, flags):
-    f = os.open(path, flags, 0o600)
-    os.chmod(path, 0o600)
-    return f
-
+from vartab import *
 import traceback
+
 try:
     from queue import Queue
 except:
     from Queue import Queue
 
 
-from PlotGraph import *
-import time
-import math
-import numpy as np
-import json
-from vartab import *
-import math
-from wx.lib.platebtn import PlateButton
 
 CONFIGFILE = ".upsdisplay"
 
@@ -160,7 +147,10 @@ class UpsDisplayFrame(wx.Frame):
 
         wx.CallLater(500, self.LoadObjects)
 
-        self.config = VarTab(init = self.GetConfig())
+        self.config = VarTab(configfile = CONFIGFILE)
+
+        # Preload with old config if present
+        self.Load(init=DEFAULT_CONFIG)
 
     def CloseUps(self):
         pass
@@ -215,15 +205,7 @@ class UpsDisplayFrame(wx.Frame):
     
 
     def PutConfig(self, config):
-        try:
-            with open(CONFIGFILE, "w", opener=create_private) as f:
-                f.write(json.dumps(config, indent=4, sort_keys=True))
-
-        except Exception as e:
-            print("PutConfig: %s" % str(e))
-
-        self.config.Load(config)
-
+        self.config.Save()
         self.LoadObjects(config)
         
     def OnNodeItemSelected(self, event):
