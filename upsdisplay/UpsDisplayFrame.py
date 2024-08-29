@@ -147,10 +147,10 @@ class UpsDisplayFrame(wx.Frame):
 
         wx.CallLater(500, self.LoadObjects)
 
-        self.config = VarTab(configfile = CONFIGFILE)
+        self.config = VarTab(config_file = CONFIGFILE)
 
         # Preload with old config if present
-        self.Load(init=DEFAULT_CONFIG)
+        self.config.Load(init=DEFAULT_CONFIG)
 
     def CloseUps(self):
         pass
@@ -205,6 +205,7 @@ class UpsDisplayFrame(wx.Frame):
     
 
     def PutConfig(self, config):
+        self.config.SetAllValues(config)
         self.config.Save()
         self.LoadObjects(config)
         

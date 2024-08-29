@@ -54,7 +54,7 @@ class VarTab():
             print("VarTab.Save: %s" % str(e))
 
     def SetAllValues(self, values):
-        self.__data = values
+        self.__data = deepcopy(values)
 
     def __getitem__(self, key=None):
         return self.GetValue(key)
