@@ -85,8 +85,8 @@ class EditTable(wx.Dialog):
 
         self.itemList = MyListCtrl(self, wx.ID_ANY, style=wx.LC_LIST)
         # Popluate the header
-        for header in self.headers:
-            self.itemList.AppendColumn(header)
+        for field in self.table_fields:
+            self.itemList.AppendColumn(self.headers[field])
 
         # Populate the rows
         for row in self.data:

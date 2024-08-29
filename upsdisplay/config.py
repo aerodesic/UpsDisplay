@@ -37,16 +37,19 @@ DEFAULT_CONFIG = {
     },
     "nodes": {
         "schema": {
-            "name": "<unique-node>",                  # name is a unique node name
-            "icon": "<icon>",                         # Device icon
-            "dns": "<str>",                           # dns is a string (but should be smarter)
-            "uri": "<str>",                           # uri is a string (but should be smarter)
-            "requires": "<zero-or-more-nodes>",       # requires is a list of <node names>
-            "wants": "<zero-or-more-nodes>",          # wants is a list of <node names>
-            "start": "<str>",                         # start is a string (action function)
-            "stop": "<str>",                          # stop is a string (action function)
-            "showmain": "<bool>",                     # main is a boolean (show on main page if True)
+            "name": "<unique-node>",                # name is a unique node name
+            "icon": "<icon>",                       # Device icon
+            "dns": "<str>",                         # dns is a string (but should be smarter)
+            "uri": "<str>",                         # uri is a string (but should be smarter)
+            "requires": "<zero-or-more-nodes>",     # requires is a list of <node names>
+            "wants": "<zero-or-more-nodes>",        # wants is a list of <node names>
+            "start": "<str>",                       # start is a string (action function)
+            "stop": "<str>",                        # stop is a string (action function)
+            "showmain": "<bool>",                   # main is a boolean (show on main page if True)
+            "username": "<str>",                    # User name credential for access
+            "password": "<password>",               # Password for credential    
         },
+        # If displayed, use these strings to identify the value on screen
         "headers": {
             "name": "Name",
             "icon": "Icon",
@@ -57,6 +60,8 @@ DEFAULT_CONFIG = {
             "start": "Start Action",
             "stop": "Stop Action",
             "showmain": "On Main Page",
+            "username": "User name",
+            "password": "Password",
         },
         # Include these in the table shown for configuration, in order of display
         'table_fields': [
@@ -77,6 +82,8 @@ DEFAULT_CONFIG = {
             'start',
             'stop',
             'showmain',
+            'username',
+            'password',
         ],
         # A default setting when creating a new entry
         'default': {
@@ -89,6 +96,8 @@ DEFAULT_CONFIG = {
             "start": "",
             "stop": "",
             "showmain": False,
+            "username": "",
+            "password": "",
         },
         "data": [{
             "name": "Nimbus",
@@ -100,6 +109,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": True,
+            "username": "",
+            "password": "",
         },{
             "name": "Cirrus",
             "icon": None,
@@ -110,6 +121,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": True,
+            "username": "",
+            "password": "",
         },{
             "name": "Cumulus",
             "icon": None,
@@ -120,6 +133,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": True,
+            "username": "",
+            "password": "",
         },{
             "name": "Nas1",
             "icon": None,
@@ -130,6 +145,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": False,
+            "username": "",
+            "password": "",
         },{
             "name": "Nas2",
             "icon": None,
@@ -140,6 +157,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": False,
+            "username": "",
+            "password": "",
         },{
             "name": "Nas3",
             "icon": None,
@@ -150,6 +169,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": False,
+            "username": "",
+            "password": "",
         },{
             "name": "Gatekeeper",
             "icon": None,
@@ -160,6 +181,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": False,
+            "username": "",
+            "password": "",
         },{
             "name": "DmzSwitch",
             "icon": None,
@@ -170,6 +193,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": False,
+            "username": "",
+            "password": "",
         },{
             "name": "NasSwitch",
             "icon": None,
@@ -180,6 +205,8 @@ DEFAULT_CONFIG = {
             "start": "apcstart",
             "stop": "apcstop",
             "showmain": False,
+            "username": "",
+            "password": "",
         }],
     }
 }

@@ -101,6 +101,7 @@ class EditNode(wx.Dialog):
     # "<one-or-more-node>"                              a list of one or more nodes
     # "<one-of-node>"                                   a list of one or more nodes
     # "<str>",                                          any string
+    # "<password>",                                     A password so create a random field of '***' for display value
     # "[ '<one-of>' 'item', 'item', 'item' ]            a choice of a single item
     # "[ '<zero-or-more>' 'item', 'item', 'item' ]      a choice of zero or more items
     # "[ '<one-or-more>' 'item', 'item', 'item' ]       a choice of one or more items
@@ -149,7 +150,12 @@ class EditNode(wx.Dialog):
 
         elif schema == "<str>":
             control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
-            control.Bind(wx.EVT_SET_FOCUS, self.OnCheckFocusChange)
+            # control.Bind(wx.EVT_SET_FOCUS, self.OnCheckFocusChange)
+            control.Bind(wx.EVT_KILL_FOCUS, self.OnCheckFocusChange)
+
+        elif schema == "<password>":
+            control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name, style=wx.TE_PASSWORD)
+            # control.Bind(wx.EVT_SET_FOCUS, self.OnCheckFocusChange)
             control.Bind(wx.EVT_KILL_FOCUS, self.OnCheckFocusChange)
 
         elif schema == "<bool>":
@@ -320,6 +326,12 @@ class EditNode(wx.Dialog):
         event.Skip()
 
     def OnCheckFocusChange(self, event):
+        item = event.GetEventObject()
+
+        print("OnCheckFocusChange: field %s has value '%s'" % (item.GetName(), item.GetValue()))
+
+        self.data[item.GetName()] = item.GetValue()
+        self.data_changed = True
         event.Skip()
 
 # end of class EditNode
