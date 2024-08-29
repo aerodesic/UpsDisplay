@@ -15,6 +15,12 @@ from EditTable import *
 from EditNode import *
 # end wxGlade
 
+import os
+os.umask(0)
+def create_private(path, flags):
+    f = os.open(path, flags, 0o600)
+    os.chmod(path, 0o600)
+    return f
 
 import traceback
 try:
@@ -90,8 +96,8 @@ class NodeItem(wx.Button):
                 fgcolor = wx.Colour("black")
 
             elif status == self.UNKNOWN:
-                bgcolor = wx.Colour("black")
-                fgcolor = wx.Colour("red")
+                bgcolor = wx.Colour("red")
+                fgcolor = wx.Colour("black")
 
             elif status == self.ERROR:
                 bgcolor = wx.Colour("red")
@@ -154,6 +160,8 @@ class UpsDisplayFrame(wx.Frame):
 
         wx.CallLater(500, self.LoadObjects)
 
+        self.config = VarTab(init = self.GetConfig())
+
     def CloseUps(self):
         pass
 
@@ -163,8 +171,7 @@ class UpsDisplayFrame(wx.Frame):
         event.Skip()
 
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        config = self.GetConfig()
-
+        config = deepcopy(self.config.GetValue())
         dlg=EditTable(self, title="Edit Nodes", config=config["nodes"], editEntry=EditNode)
         if dlg.ShowModal() == wx.ID_OK:
             # print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
@@ -191,11 +198,12 @@ class UpsDisplayFrame(wx.Frame):
     #
     def LoadObjects(self, config=None):
         if config is None:
-            config = self.GetConfig()
+            config = self.config
         
         # Remove all info panels
         self.infoSizer.Clear(True)
-        for node in config['nodes']['data']:
+        nodes = self.config.GetValue("nodes.data")
+        for node in nodes:
             if self.displayAllNodes.IsChecked() or node['showmain']:
                 # Build Node object and add to display
                 nodebutton = NodeItem(self.mainPanel, size=wx.Size(150, 75), nodeinfo=node)
@@ -208,11 +216,13 @@ class UpsDisplayFrame(wx.Frame):
 
     def PutConfig(self, config):
         try:
-            with open(CONFIGFILE, "w") as f:
+            with open(CONFIGFILE, "w", opener=create_private) as f:
                 f.write(json.dumps(config, indent=4, sort_keys=True))
 
         except Exception as e:
             print("PutConfig: %s" % str(e))
+
+        self.config.Load(config)
 
         self.LoadObjects(config)
         
