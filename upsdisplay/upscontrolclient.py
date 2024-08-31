@@ -27,8 +27,6 @@ class UpscontrolClient(Thread):
         super(UpscontrolClient, self).__init__()
         self.__busname_control = busname
         self.__servicename_control = servicename
-        self.__busname_printerserver = __BUSNAME_PRINTERSERVER
-        self.__servicename_printerserver = __SERVICENAME_PRINTERSERVER
         self.__bus = bus if bus else dbus.SystemBus()
         self.__loop = None
         self.__callback = callback
@@ -61,7 +59,7 @@ class UpscontrolClient(Thread):
         # self.__gobject = DBusGMainLoop(set_as_default=True)
         self.__gobject = DBusGMainLoop()
 
-        self.__upscontrol_obj = self._bus.get_object(self.__busname_control, self.__servicename_control)
+        self.__upscontrol_obj = self.__bus.get_object(self.__busname_control, self.__servicename_control)
         self.__upscontrol = dbus.Interface(self.__upscontrol_obj, self.__busname_control)
 
         # Capture data reports
@@ -97,9 +95,8 @@ class UpscontrolClient(Thread):
         if self.__callback:
             self.__callback("data", data)
 
-
     def SetValue(self, name, value):
         self.__upscontrol.SetValue(name, value)
 
     def GetValue(self, name):
-        return self.__upscontrol.GetValue()
+        return self.__upscontrol.GetValue(name)
