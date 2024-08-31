@@ -15,26 +15,26 @@ from TextCheckboxSelect import *
 # end wxGlade
 
 
-class EditNode(wx.Dialog):
+class EditEntry(wx.Dialog):
     # The 'config' variable points to a base of a table defined by 'schema', 'headers' and 'data' entries.
     def __init__(self, parent=None, config=None, edit_fields=[], schema=None, headers=None, data=None, *args, **kwds):
         self.config = config   # Entire config reference
-        self.data = data       # Data for node being edited
-        self.schema = schema   # Schema for node being edited
-        self.headers = headers # Headers for node being edited
+        self.data = data       # Data for item being edited
+        self.schema = schema   # Schema for item being edited
+        self.headers = headers # Headers for item being edited
         self.edit_fields = edit_fields
 
-        # print("EditNode: config %s" % config)
-        # print("          edit_fields %s" % edit_fields)
-        # print("          schema %s" % schema)
-        # print("          headers %s" % headers)
-        # print("          data %s" % data)
+        # print("EditEntry: config %s" % config)
+        # print("           edit_fields %s" % edit_fields)
+        # print("           schema %s" % schema)
+        # print("           headers %s" % headers)
+        # print("           data %s" % data)
 
         self.data_changed = False
 
         kwds["parent"] = parent
 
-        # begin wxGlade: EditNode.__init__
+        # begin wxGlade: EditEntry.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         wx.Dialog.__init__(self, *args, **kwds)
 
@@ -47,21 +47,20 @@ class EditNode(wx.Dialog):
         mainSizer.Add(buttonSizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
         # Generate edit items
-        row=0
+        rows=0
         # print("data is %s" % self.data)
         for field in self.edit_fields:
+            print("EditEntry: Creating entry for %s" % field)
             schema = self.schema[field]
             description = self.headers[field]
-            static_text, control, growable, = self.create_edit_entry(schema, description, field)
+            static_text, control, growable = self.create_edit_entry(schema, description, field)
             if control is not None:
-                # print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (row, field, description, schema))
+                rows = rows + 1
+                # print("EditEntry: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))
                 self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)
                 self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)
-                if growable:
-                    self.itemSizer.AddGrowableRow(row)
-                row = row + 1
 
-        self.itemSizer.SetRows(row)
+        self.itemSizer.SetRows(rows)
         self.Fit()
         # print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))
 
@@ -96,10 +95,10 @@ class EditNode(wx.Dialog):
 
     # Create and return the static text and edit field as a tuple
     # Options for schema are:
-    # "<unique-node>",                                  name is a unique node name (not already defined)
-    # "<zero-or-more-node>"                             a list of zero or more nodes
-    # "<one-or-more-node>"                              a list of one or more nodes
-    # "<one-of-node>"                                   a list of one or more nodes
+    # "<unique-item>",                                  name is a unique item name (not already defined)
+    # "<zero-or-more-items>"                            a list of zero or more items
+    # "<one-or-more-items>"                             a list of one or more items
+    # "<one-of-items>"                                  a list of one or more items
     # "<str>",                                          any string
     # "<password>",                                     A password so create a random field of '***' for display value
     # "[ '<one-of>' 'item', 'item', 'item' ]            a choice of a single item
@@ -123,30 +122,44 @@ class EditNode(wx.Dialog):
         data = self.data[name]
 
         # print("create_edit_entry: schema '%s' description '%s' name '%s' data '%s'" % (schema, description, name, self.data[name]))
-        if schema == "<unique-node>":
-            # Create a TextCtrl with an editing function to check for a unique node name
+        if schema == "<unique-item>":
+            # Create a TextCtrl with an editing function to check for a unique item name
             control = wx.TextCtrl(self, wx.ID_ANY, self.data[name], name=name)
             data = self.data[name]
 
-            # Create a list of current node names but remove the current node being edited from the list
-            list_of_nodes = [ node['name'] for node in self.config['data']]
-            if self.data['name'] in list_of_nodes:
-                list_of_nodes.remove(self.data['name'])
+            # Create a list of current item names but remove the current item being edited from the list
+            list_of_items = [ item['name'] for item in self.config['data']]
+            if self.data['name'] in list_of_items:
+                list_of_items.remove(self.data['name'])
 
-            # print("Removed %s from node list: %s" % (data, list_of_nodes))
-            control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_nodes))
+            # print("Removed %s from item list: %s" % (data, list_of_items))
+            control.Bind(wx.EVT_KILL_FOCUS, lambda event: self.OnCheckUniqueNodeName(event, invalid_names=list_of_items))
 
-        elif schema == "<zero-or-more-nodes>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="zero-or-more", title="Zero or more nodes"))
+        elif schema == "<zero-or-more-items>":
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name, style=wx.TE_READONLY)
+            control.Bind(wx.EVT_LEFT_DOWN,
+                         lambda event: self.OnCheckboxMultiple(event,
+                                                               choices=[item['name'] for item in self.config['data']],
+                                                               choose="zero-or-more",
+                                                               title="Zero or more items")
+            )
 
-        elif schema == "<one-or-more-nodes>":
-            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=[node['name'] for node in self.config['data']], choose="one-or-more", title="One or more nodes"))
+        elif schema == "<one-or-more-items>":
+            control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data), name=name, style=wx.TE_READONLY)
+            control.Bind(wx.EVT_LEFT_DOWN,
+                         lambda event: self.OnCheckboxMultiple(event,
+                                                               choices=[item['name'] for item in self.config['data']],
+                                                               choose="one-or-more",
+                                                               title="One or more items")
+            )
 
-        elif schema == "<one-of-node>":
-            control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name)
-            control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=[node['name'] for node in self.config['data']], title="Chose one node"))
+        elif schema == "<one-of-items>":
+            control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name, style=wx.TE_READONLY)
+            control.Bind(wx.EVT_LEFT_DOWN,
+                         lambda event: self.OnCheckboxOneOf(event,
+                                                            choices=[item['name'] for item in self.config['data']],
+                                                            title="Chose one item")
+            )
 
         elif schema == "<str>":
             control = wx.TextCtrl(self, wx.ID_ANY, str(self.data[name]), name=name)
@@ -166,16 +179,30 @@ class EditNode(wx.Dialog):
         elif type(schema) == list and len(schema) > 1:
             # A list of items
             if schema[0] == "<one-of>":
-                 control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name)
-                 control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxOneOf(event, choices=schema[1:], title="Choose one"))
+                control = wx.TextCtrl(self, wx.ID_ANY, data if data is not None else "" , name=name, style=wx.TE_READONLY)
+                control.Bind(wx.EVT_LEFT_DOWN,
+                             lambda event: self.OnCheckboxOneOf(event,
+                                                                choices=schema[1:],
+                                                                title="Choose one")
+                )
 
             elif schema[0] == "<zero-or-more>":
-                control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name)
-                control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=schema[1:], choose="zero-or-more", title="Choose any of these"))
+                control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name, style=wx.TE_READONLY)
+                control.Bind(wx.EVT_LEFT_DOWN,
+                             lambda event: self.OnCheckboxMultiple(event,
+                                                                   choices=schema[1:],
+                                                                   choose="zero-or-more", 
+                                                                   title="Choose any of these")
+                )
 
             elif schema[0] == "<one-or-more>":
-                control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name)
-                control.Bind(wx.EVT_LEFT_DOWN, lambda event: self.OnCheckboxMultiple(event, choices=schema[1:], choose="one-or-more", title="One or more"))
+                control = wx.TextCtrl(self, wx.ID_ANY, ", ".join(data) if type(data) is list else "", name=name, style=wx.TE_READONLY)
+                control.Bind(wx.EVT_LEFT_DOWN,
+                             lambda event: self.OnCheckboxMultiple(event,
+                                                                   choices=schema[1:],
+                                                                   choose="one-or-more",
+                                                                   title="One or more")
+                )
         elif schema == "<icon>":
             # Try to load the bitmap from the data string
             bitmap = wx.Bitmap()
@@ -199,7 +226,7 @@ class EditNode(wx.Dialog):
         return static_text, control, growable
 
 
-    def OnTextEnter(self, event):  # wxGlade: EditNode.<event_handler>
+    def OnTextEnter(self, event):  # wxGlade: EditEntry.<event_handler>
         print("Event handler 'OnTextEnter' not implemented!")
         event.Skip()
 
@@ -240,7 +267,7 @@ class EditNode(wx.Dialog):
         event.Skip()
 
     # Bring up a checkbox dialog that forces a single selection (i.e. deselects other selections automatically)
-    def OnCheckboxOneOf(self, event, choices, title="Choose one node"):
+    def OnCheckboxOneOf(self, event, choices, title="Choose one item"):
         item = event.GetEventObject()
 
         # print("OnCheckboxOneOf: item is %s" % item.GetName())
@@ -304,11 +331,11 @@ class EditNode(wx.Dialog):
 
 
     # Process OK and put the data back into the configuration table entry identified by 'name'
-    def OnOkButton(self, event):  # wxGlade: EditNode.<event_handler>
+    def OnOkButton(self, event):  # wxGlade: EditEntry.<event_handler>
         self.EndModal(wx.ID_OK)
         event.Skip()
 
-    def OnCancelButton(self, event):  # wxGlade: EditNode.<event_handler>
+    def OnCancelButton(self, event):  # wxGlade: EditEntry.<event_handler>
         self.itemSizer.Clear(True)
         self.EndModal(wx.ID_CANCEL)
         event.Skip()
@@ -319,7 +346,7 @@ class EditNode(wx.Dialog):
     def IsDataChanged(self):
         return self.data_changed
 
-    def OnDeleteButton(self, event):  # wxGlade: EditNode.<event_handler>
+    def OnDeleteButton(self, event):  # wxGlade: EditEntry.<event_handler>
         dlg = ShowMessage("Delete this entry?", "Are you sure?", buttons={"Yes": wx.ID_OK, "No": wx.ID_CANCEL})
         if dlg.ShowModal() == wx.ID_OK:
             self.EndModal(wx.ID_DELETE)
@@ -334,5 +361,5 @@ class EditNode(wx.Dialog):
         self.data_changed = True
         event.Skip()
 
-# end of class EditNode
+# end of class EditEntry
 

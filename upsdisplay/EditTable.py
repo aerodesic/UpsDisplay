@@ -71,7 +71,6 @@ class EditTable(wx.Dialog):
 
         self.table_fields = table_fields if table_fields is not None else config["table_fields"]
         self.edit_fields = edit_fields if edit_fields is not None else config["edit_fields"]
-        # self.headers = headers if headers is not None else [ config["headers"][node] for node in self.edit_fields ]
         self.headers = headers if headers is not None else config['headers']
         self.schema = schema if schema is not None else config["schema"]
 
@@ -85,8 +84,8 @@ class EditTable(wx.Dialog):
 
         self.itemList = MyListCtrl(self, wx.ID_ANY, style=wx.LC_LIST)
         # Popluate the header
-        for field in self.table_fields:
-            self.itemList.AppendColumn(self.headers[field])
+        for header in self.headers:
+            self.itemList.AppendColumn(self.headers[header])
 
         # Populate the rows
         for row in self.data:

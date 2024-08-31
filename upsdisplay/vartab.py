@@ -135,7 +135,7 @@ class VarTab():
 
         # print("SetValue: protect %s subvar %s" % (protect, subvar))
 
-        if protect and last in subvar and (subvar[last].find("$eval{") >= 0 or subvar[last].find("${") >= 0):
+        if protect and last in subvar and type(subvar[last]) is str and (subvar[last].find("$eval{") >= 0 or subvar[last].find("${") >= 0):
             raise VarTabException("Var %s contains evaluated field and not overriden: %s" % (varname, subvar[last]))
 
         else:

@@ -12,7 +12,7 @@ import random
 import json
 # begin wxGlade: extracode
 from EditTable import *
-from EditNode import *
+from EditEntry import *
 # end wxGlade
 
 from vartab import *
@@ -27,7 +27,7 @@ except:
 
 CONFIGFILE = ".upsdisplay"
 
-from config import DEFAULT_CONFIG
+from config import *
 
 class NodeItem(wx.Button):
 # class NodeItem(wx.BitmapButton):
@@ -40,7 +40,7 @@ class NodeItem(wx.Button):
 
     def __init__(self, parent, id=wx.ID_ANY, label="\n", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
     # def __init__(self, parent, id=wx.ID_ANY, bitmap=wx.NullBitmap, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.ButtonNameStr, nodeinfo=[]):
-        print("NodeItem: %s" % (str(nodeinfo)))
+        # print("NodeItem: %s" % (str(nodeinfo)))
 
         self.bitmap = None
         self.status = None
@@ -149,8 +149,16 @@ class UpsDisplayFrame(wx.Frame):
 
         self.config = VarTab(config_file = CONFIGFILE)
 
+        # Combine the system and node default tables
+        default_config = DEFAULT_SYSTEM_CONFIG
+        default_config['nodes'] = DEFAULT_NODE_CONFIG
+
         # Preload with old config if present
-        self.config.Load(init=DEFAULT_CONFIG)
+        self.config.Load(init=default_config)
+
+        # Overwrite defaults for all of the items in the DEFAULT_SYSTEM_CONFIG
+        for item in DEFAULT_SYSTEM_CONFIG:
+            self.config.SetValue(item, DEFAULT_SYSTEM_CONFIG[item])
 
     def CloseUps(self):
         pass
@@ -162,7 +170,7 @@ class UpsDisplayFrame(wx.Frame):
 
     def OnNodeConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
         config = deepcopy(self.config.GetValue())
-        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"], editEntry=EditNode)
+        dlg=EditTable(self, title="Edit Nodes", config=config["nodes"], editEntry=EditEntry)
         if dlg.ShowModal() == wx.ID_OK:
             # print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
             if dlg.IsDataChanged():
@@ -171,17 +179,16 @@ class UpsDisplayFrame(wx.Frame):
         event.Skip()
 
     def OnDevicesConfigButton(self, event):  # wxGlade: UpsDisplayFrame.<event_handler>
-        print("Event handler 'OnDevicesConfigButton' not implemented!")
+        config = deepcopy(self.config.GetValue())
+        # print("OnDevicesConfigButton: config for devices is %s" % (config['devices']))
+        dlg=EditTable(self, title="Edit Devices", config=config["devices"], editEntry=EditEntry)
+        if dlg.ShowModal() == wx.ID_OK:
+            # print("IsDataChanged: %s" % str(dlg.IsDataChanged()))
+            if dlg.IsDataChanged():
+                config['devices']['data'] = dlg.GetResults()
+                self.PutConfig(config)
         event.Skip()
-
-    def GetConfig(self):
-        try:
-            with open(CONFIGFILE, "r") as f:
-                config = json.load(f)
-
-        except:
-            config = DEFAULT_CONFIG
-        return config
+        event.Skip()
 
     # 
     # Load the objects from the config information and propagate the Node display

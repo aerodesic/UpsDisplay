@@ -3,7 +3,7 @@
 
 <application encoding="UTF-8" for_version="3.0" header_extension=".h" indent_amount="4" indent_symbol="space" is_template="0" language="python" mark_blocks="1" option="1" overwrite="0" path="../upsdisplay/" source_extension=".cpp" top_window="upsdisplayFrame" use_gettext="1" use_new_namespace="1">
     <object class="UpsDisplayFrame" name="upsdisplayFrame" base="EditFrame">
-        <extracode>from EditTable import *\nfrom EditNode import *</extracode>
+        <extracode>from EditTable import *\nfrom EditEntry import *</extracode>
         <events>
             <handler event="EVT_CLOSE">OnClose</handler>
         </events>
@@ -224,7 +224,7 @@
             </object>
         </object>
     </object>
-    <object class="EditNode" name="editNode" base="EditDialog">
+    <object class="EditEntry" name="editEntry" base="EditDialog">
         <extracode>from ShowMessage import *\nfrom TextCheckboxSelect import *</extracode>
         <extracode_post>#self.Maximize()\nself.Fit()\nself.Layout()\nself.SetTitle(self.data['name'])</extracode_post>
         <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
@@ -261,7 +261,7 @@
                         <option>0</option>
                         <border>0</border>
                         <object class="wxButton" name="buttonOk" base="EditButton">
-                            <extracode_pre># Generate edit items\nrows=0\n# print("data is %s" % self.data)\nfor field in self.edit_fields:\n    schema = self.schema[field]\n    description = self.headers[field]\n    static_text, control = self.create_edit_entry(schema, description, field)\n    if control is not None:\n        rows = rows + 1\n        # print("EditNode: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))\n        self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)\n        self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)\n\nself.itemSizer.SetRows(rows)\nself.Fit()\n# print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))\n\n# End of generated edit items</extracode_pre>
+                            <extracode_pre># Generate edit items\nrows=0\n# print("data is %s" % self.data)\nfor field in self.edit_fields:\n    schema = self.schema[field]\n    description = self.headers[field]\n    static_text, control = self.create_edit_entry(schema, description, field)\n    if control is not None:\n        rows = rows + 1\n        # print("EditEntry: filling row %d with field '%s' description '%s' schema '%s'" % (rows, field, description, schema))\n        self.itemSizer.Add(static_text, 0, wx.ALIGN_CENTER_VERTICAL, 0)\n        self.itemSizer.Add(control, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 0)\n\nself.itemSizer.SetRows(rows)\nself.Fit()\n# print("itemSizer has %d rows and %d cols" % (self.itemSizer.GetRows(), self.itemSizer.GetCols()))\n\n# End of generated edit items</extracode_pre>
                             <events>
                                 <handler event="EVT_BUTTON">OnOkButton</handler>
                             </events>
