@@ -26,6 +26,7 @@ class TextCheckboxSelect(wx.Dialog):
         # begin wxGlade: TextCheckboxSelect.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
+        self.SetSize((640, 480))
         self.SetTitle(_("Select zero or more items"))
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
@@ -49,7 +50,6 @@ class TextCheckboxSelect(wx.Dialog):
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
 
         self.SetAffirmativeId(self.buttonOK.GetId())
         self.SetEscapeId(self.buttonCANCEL.GetId())
@@ -59,7 +59,7 @@ class TextCheckboxSelect(wx.Dialog):
             self.SetTitle(title)
         self.Layout()
         mainSizer.Fit(self)
-        self.Maximize()
+        # self.Maximize()
 
         self.Bind(wx.EVT_CHECKLISTBOX, self.OnCheckboxItemSelected, self.choiceList)
         # end wxGlade

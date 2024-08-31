@@ -105,8 +105,9 @@ class UpsDisplayFrame(wx.Frame):
     def __init__(self, *args, **kwds):
 
         # begin wxGlade: UpsDisplayFrame.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.MAXIMIZE | wx.STAY_ON_TOP
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
         wx.Frame.__init__(self, *args, **kwds)
+        self.SetSize((640, 480))
         self.SetTitle(_("UPS and PDU control"))
 
         self.mainPanel = wx.Panel(self, wx.ID_ANY)
@@ -136,7 +137,6 @@ class UpsDisplayFrame(wx.Frame):
 
         self.mainPanel.SetSizer(self.mainSizer)
 
-        self.mainSizer.Fit(self)
         self.Layout()
 
         self.Bind(wx.EVT_CHECKBOX, self.OnShowAllClicked, self.displayAllNodes)
@@ -203,7 +203,7 @@ class UpsDisplayFrame(wx.Frame):
         for node in nodes:
             if self.displayAllNodes.IsChecked() or node['showmain']:
                 # Build Node object and add to display
-                nodebutton = NodeItem(self.mainPanel, size=wx.Size(150, 75), nodeinfo=node)
+                nodebutton = NodeItem(self.mainPanel, size=wx.Size(100, 75), nodeinfo=node)
                 self.infoSizer.Add(nodebutton, 0, wx.ALL, 5)
                 self.Bind(wx.EVT_BUTTON, self.OnNodeItemSelected, nodebutton)
 

@@ -35,7 +35,7 @@ class EditEntry(wx.Dialog):
         kwds["parent"] = parent
 
         # begin wxGlade: EditEntry.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
@@ -50,7 +50,6 @@ class EditEntry(wx.Dialog):
         rows=0
         # print("data is %s" % self.data)
         for field in self.edit_fields:
-            print("EditEntry: Creating entry for %s" % field)
             schema = self.schema[field]
             description = self.headers[field]
             static_text, control, growable = self.create_edit_entry(schema, description, field)
@@ -85,7 +84,6 @@ class EditEntry(wx.Dialog):
         self.Layout()
         #self.Maximize()
         self.Fit()
-        self.Layout()
         self.SetTitle(self.data['name'])
 
         self.Bind(wx.EVT_BUTTON, self.OnOkButton, self.buttonOk)
