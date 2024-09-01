@@ -15,6 +15,7 @@ from EditTable import *
 from EditEntry import *
 # end wxGlade
 
+from upscontrolclient import *
 from UpsControlVartab import *
 import traceback
 
@@ -139,27 +140,28 @@ class UpsDisplayFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         # end wxGlade
 
-        wx.CallLater(500, self.LoadObjects)
-
         self.config = VarTab()
 
         # Configuration is saved in upscontrol.  Request initial update
-        wx.CallLater(2000, self.StartUpsControl)
-
-    def StartUpsControl(self):
-        syslog.syslog("StartUpsControl entered")
+        syslog.syslog("Starting UpsControlClient")
         try:
-            self.__upscontrol = UpsControlClient()
-            self.__upscontro.start()
+            self.__upscontrol = UpsControlClient(callback=self.UpsControlCallback))
+            self.__upscontrol.start()
+            self.__upscontrol.wait_running()
 
-            self.config.SetAllValues(self.__upscontrol.GetConfig())
-
-            self.LoadObjects()
+            wx.CallLater(5000, self.LoadInitialConfiguration())
 
         except Exception:
-            traceback.print_exc()
+            syslog.syslog("Starting UpsControlClient exception %s" % str(e))
 
-        syslog.syslog("StartUpsControl exiting")
+    def UpsControlCallback(self, reason, data):
+        syslog.syslog("UpsControlCallback: reason '%s' data %s" % (reason, str(data)))
+
+    def LoadInitialConfiguration()(self):
+        # Load configuration from upscontrol
+        self.config.SetAllValues(self.__upscontrol.GetConfig())
+
+        self.LoadObjects()
 
     def CloseUps(self):
         pass
