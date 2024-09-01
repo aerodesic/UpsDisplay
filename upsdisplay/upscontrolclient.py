@@ -85,7 +85,7 @@ class UpscontrolClient(Thread):
     def run_as_thread(self):
         self.__run_thread = Thread(target=self.run)
         self.__run_thread.start()
-        return __run_thread
+        return self.__run_thread
 
     def wait_running(self):
         self.__start_mutex.acquire()
