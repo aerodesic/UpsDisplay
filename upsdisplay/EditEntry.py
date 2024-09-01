@@ -82,7 +82,7 @@ class EditEntry(wx.Dialog):
         mainSizer.Fit(self)
 
         self.Layout()
-        #self.Maximize()
+        self.Maximize()
         self.Fit()
         self.SetTitle(self.data['name'])
 

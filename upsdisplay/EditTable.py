@@ -117,7 +117,7 @@ class EditTable(wx.Dialog):
         self.SetEscapeId(self.buttonCancel.GetId())
 
         self.Layout()
-        # self.Maximize()
+        self.Maximize()
         self.Fit()
         self.SetTitle(title)
 

@@ -100,7 +100,7 @@ class UpsDisplayFrame(wx.Frame):
     def __init__(self, *args, **kwds):
 
         # begin wxGlade: UpsDisplayFrame.__init__
-        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE | wx.MAXIMIZE | wx.STAY_ON_TOP
         wx.Frame.__init__(self, *args, **kwds)
         self.SetSize((640, 480))
         self.SetTitle(_("UPS and PDU control"))
