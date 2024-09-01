@@ -96,12 +96,16 @@ class UpscontrolClient(Thread):
             self.__loop.quit()
             self.join()
 
-    def __indicate_data_function(self, data):
+    def __indicate_data_function(self, reason, data):
         if self.__callback:
-            self.__callback("data", data)
+            self.__callback(reason, data)
 
     def SetValue(self, name, value):
         self.__upscontrol.SetValue(name, value)
 
     def GetValue(self, name):
         return self.__upscontrol.GetValue(name)
+
+    def __default_callback(self, reason, data):
+        print("__default_callback: reason '%s' data %s" % (reason, data))
+
