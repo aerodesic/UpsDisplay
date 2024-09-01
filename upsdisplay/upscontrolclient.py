@@ -23,7 +23,7 @@ UPSCONTROL_SERVICENAME_CONTROL = "/com/robosity/upscontrol/control"
 
 
 def callback(reason, data):
-    print("__default_callback: reason '%s' data %s" % (reason, json.loads(data)))
+    print("__default_callback: reason '%s' data %s" % (reason, data))
 
 class UpscontrolClient(Thread):
 
@@ -100,6 +100,7 @@ class UpscontrolClient(Thread):
             self.__loop.quit()
             self.join()
 
+    # A function to indicate state change.  'reason' is a string and 'data' is a json object
     def __indicate_data_function(self, reason, data):
         if self.__callback:
             self.__callback(reason, json.loads(data))
