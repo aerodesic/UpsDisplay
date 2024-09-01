@@ -12,6 +12,7 @@ class VarTab():
 
     def __init__(self, config_file=None):
         self.__config_file = config_file
+        self.__data = {}
 
     def Load(self, config_file = None, init=None):
         if config_file is None:
