@@ -141,7 +141,7 @@ class UpsDisplayFrame(wx.Frame):
 
         wx.CallLater(500, self.LoadObjects)
 
-        self.config = UpsControlVarTab()
+        self.config = VarTab()
 
         # Configuration is saved in upscontrol.  Request initial update
         wx.CallLater(2000, self.LoadValuesFromUpscontrol)
