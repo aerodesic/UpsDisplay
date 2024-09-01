@@ -79,7 +79,6 @@ class EditTable(wx.Dialog):
         # begin wxGlade: EditTable.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP
         wx.Dialog.__init__(self, *args, **kwds)
-        self.SetSize((640, 480))
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
@@ -112,6 +111,7 @@ class EditTable(wx.Dialog):
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
         self.SetSizer(mainSizer)
+        mainSizer.Fit(self)
 
         self.SetAffirmativeId(self.buttonOk.GetId())
         self.SetEscapeId(self.buttonCancel.GetId())
