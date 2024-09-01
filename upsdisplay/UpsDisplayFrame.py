@@ -15,19 +15,13 @@ from EditTable import *
 from EditEntry import *
 # end wxGlade
 
-from vartab import *
+from UpsControlVartab import *
 import traceback
 
 try:
     from queue import Queue
 except:
     from Queue import Queue
-
-
-
-CONFIGFILE = ".upsdisplay"
-
-from config import *
 
 class NodeItem(wx.Button):
 # class NodeItem(wx.BitmapButton):
@@ -147,18 +141,13 @@ class UpsDisplayFrame(wx.Frame):
 
         wx.CallLater(500, self.LoadObjects)
 
-        self.config = VarTab(config_file = CONFIGFILE)
+        self.config = UpsControlVarTab()
 
-        # Combine the system and node default tables
-        default_config = DEFAULT_SYSTEM_CONFIG
-        default_config['nodes'] = DEFAULT_NODE_CONFIG
+        # Configuration is saved in upscontrol.  Request initial update
+        wx.CallLater(2000, self.LoadValuesFromUpscontrol)
 
-        # Preload with old config if present
-        self.config.Load(init=default_config)
-
-        # Overwrite defaults for all of the items in the DEFAULT_SYSTEM_CONFIG
-        for item in DEFAULT_SYSTEM_CONFIG:
-            self.config.SetValue(item, DEFAULT_SYSTEM_CONFIG[item])
+    def LoadValuesFromUpscontrol(self):
+        self.config.SetAllValues(self.__upscontrol.GetConfig())
 
     def CloseUps(self):
         pass

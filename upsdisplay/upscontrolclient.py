@@ -111,3 +111,8 @@ class UpscontrolClient(Thread):
     def GetValue(self, name):
         return json.loads(self.__upscontrol.GetValue(name))
 
+    def SetConfig(self, config):
+        self.__upscontrol.SetConfig(json.dumps(config))
+
+    def GetConfig(self):
+        return json.loads(self.__upscontrol.GetConfig())
