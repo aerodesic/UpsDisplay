@@ -147,10 +147,19 @@ class UpsDisplayFrame(wx.Frame):
         wx.CallLater(2000, self.StartUpsControl)
 
     def StartUpsControl(self):
-        self.__upscontrol = UpsControlClient()
-        self.__upscontro.start()
+        syslog.syslog("StartUpsControl entered")
+        try:
+            self.__upscontrol = UpsControlClient()
+            self.__upscontro.start()
 
-        self.config.SetAllValues(self.__upscontrol.GetConfig())
+            self.config.SetAllValues(self.__upscontrol.GetConfig())
+
+            self.LoadObjects()
+
+        except Exception:
+            traceback.print_exc()
+
+        syslog.syslog("StartUpsControl exiting")
 
     def CloseUps(self):
         pass
