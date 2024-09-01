@@ -145,11 +145,11 @@ class UpsDisplayFrame(wx.Frame):
         # Configuration is saved in upscontrol.  Request initial update
         syslog.syslog("Starting UpsControlClient")
         try:
-            self.__upscontrol = UpsControlClient(callback=self.UpsControlCallback))
+            self.__upscontrol = UpsControlClient(callback=self.UpsControlCallback)
             self.__upscontrol.start()
             self.__upscontrol.wait_running()
 
-            wx.CallLater(5000, self.LoadInitialConfiguration())
+            wx.CallLater(5000, self.LoadInitialConfiguration)
 
         except Exception:
             syslog.syslog("Starting UpsControlClient exception %s" % str(e))
@@ -157,7 +157,7 @@ class UpsDisplayFrame(wx.Frame):
     def UpsControlCallback(self, reason, data):
         syslog.syslog("UpsControlCallback: reason '%s' data %s" % (reason, str(data)))
 
-    def LoadInitialConfiguration()(self):
+    def LoadInitialConfiguration(self):
         # Load configuration from upscontrol
         self.config.SetAllValues(self.__upscontrol.GetConfig())
 
