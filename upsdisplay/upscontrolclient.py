@@ -22,7 +22,7 @@ UPSCONTROL_BUSNAME_CONTROL = "com.robosity.upscontrol.control"
 UPSCONTROL_SERVICENAME_CONTROL = "/com/robosity/upscontrol/control"
 
 
-def callback(self, reason, data):
+def callback(reason, data):
     print("__default_callback: reason '%s' data %s" % (reason, json.loads(data)))
 
 class UpscontrolClient(Thread):
