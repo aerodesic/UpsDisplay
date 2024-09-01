@@ -40,7 +40,7 @@ class EditEntry(wx.Dialog):
 
         mainSizer = wx.FlexGridSizer(2, 1, 0, 0)
 
-        self.itemSizer = wx.FlexGridSizer(0, 2, 5, 5)
+        self.itemSizer = wx.FlexGridSizer(0, 4, 5, 5)
         mainSizer.Add(self.itemSizer, 1, wx.ALL | wx.EXPAND, 5)
 
         buttonSizer = wx.FlexGridSizer(1, 3, 0, 0)
@@ -75,6 +75,7 @@ class EditEntry(wx.Dialog):
         buttonSizer.Add(self.deleteButton, 0, 0, 0)
 
         self.itemSizer.AddGrowableCol(1)
+        self.itemSizer.AddGrowableCol(3)
 
         mainSizer.AddGrowableRow(0)
         mainSizer.AddGrowableCol(0)
