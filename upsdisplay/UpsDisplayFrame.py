@@ -144,9 +144,12 @@ class UpsDisplayFrame(wx.Frame):
         self.config = VarTab()
 
         # Configuration is saved in upscontrol.  Request initial update
-        wx.CallLater(2000, self.LoadValuesFromUpscontrol)
+        wx.CallLater(2000, self.StartUpsControl)
 
-    def LoadValuesFromUpscontrol(self):
+    def StartUpsControl(self):
+        self.__upscontrol = UpsControlClient()
+        self.__upscontro.start()
+
         self.config.SetAllValues(self.__upscontrol.GetConfig())
 
     def CloseUps(self):
@@ -202,7 +205,7 @@ class UpsDisplayFrame(wx.Frame):
 
     def PutConfig(self, config):
         self.config.SetAllValues(config)
-        self.config.Save()
+        self.__upscontrol.PutConfig(config)
         self.LoadObjects(config)
         
     def OnNodeItemSelected(self, event):
