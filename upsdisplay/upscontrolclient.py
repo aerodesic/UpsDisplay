@@ -21,6 +21,10 @@ import json
 UPSCONTROL_BUSNAME_CONTROL = "com.robosity.upscontrol.control"
 UPSCONTROL_SERVICENAME_CONTROL = "/com/robosity/upscontrol/control"
 
+
+def callback(self, reason, data):
+    print("__default_callback: reason '%s' data %s" % (reason, json.loads(data)))
+
 class UpscontrolClient(Thread):
 
     def __init__(self, busname = UPSCONTROL_BUSNAME_CONTROL, servicename = UPSCONTROL_SERVICENAME_CONTROL, bus = None, callback = None, loop = None):
@@ -98,14 +102,11 @@ class UpscontrolClient(Thread):
 
     def __indicate_data_function(self, reason, data):
         if self.__callback:
-            self.__callback(reason, data)
+            self.__callback(reason, json.loads(data))
 
     def SetValue(self, name, value):
-        self.__upscontrol.SetValue(name, value)
+        self.__upscontrol.SetValue(name, json.dumps(value))
 
     def GetValue(self, name):
-        return self.__upscontrol.GetValue(name)
-
-    def __default_callback(self, reason, data):
-        print("__default_callback: reason '%s' data %s" % (reason, data))
+        return json.loads(self.__upscontrol.GetValue(name))
 
