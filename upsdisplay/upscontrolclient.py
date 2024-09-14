@@ -100,6 +100,12 @@ class UpsControlClient(Thread):
         if self.__callback:
             self.__callback(reason, json.loads(data))
 
+    def Activate(self, device):
+        self.__upscontrol.Activate(device)
+
+    def Deactivate(self, device):
+        self.__upscontrol.Deactivate(device)
+
     def SetValue(self, name, value):
         self.__upscontrol.SetValue(name, json.dumps(value))
 
